@@ -27,6 +27,19 @@ class TuckPage extends StoryPage {
     if (a === 'blanket') { sfx('swoosh', 0.4, 1.4); st.say('SNUG AS A BUG!', 640, 380, 46, '#ffe9b4'); }
   }
   pillow(i) { return art('bg-14-tuck-in') ? [[465, 410], [803, 410]][i] : [[404, 446], [744, 446]][i]; } // where each head lies
+  // the lights-out shade, made once from the painting: deep blue, more opaque the lighter the spot
+  shade(bg) {
+    if (this.shadeImg) return this.shadeImg;
+    const w = bg.naturalWidth >> 2, h = bg.naturalHeight >> 2, c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d'); g.filter = 'blur(6px)'; g.drawImage(bg, 0, 0, w, h); g.filter = 'none';
+    const d = g.getImageData(0, 0, w, h), p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      const l = (0.3 * p[i] + 0.59 * p[i + 1] + 0.11 * p[i + 2]) / 255;
+      p[i] = 6; p[i + 1] = 8; p[i + 2] = 28; p[i + 3] = 255 * Math.min(0.97, 0.8 + 0.3 * l * l);
+    }
+    g.putImageData(d, 0, 0);
+    return (this.shadeImg = c);
+  }
   sleepy() { return clamp((this.st.t - 6) / 40, 0, 0.8); }
   tick(dt, t, A) {
     this.blinkA -= dt; if (this.blinkA < -0.2) this.blinkA = rnd(2.5, 5);
@@ -87,9 +100,11 @@ class TuckPage extends StoryPage {
     }
     this.papa.draw();
     this.mama.draw();
-    if (dark > 0) {
-      ctx.globalAlpha = dark * 0.55; rect(0, 0, W, H, '#0c0e2a'); ctx.globalAlpha = dark;
-      for (const s of this.ceilingStars) { glow(s.x, s.y, 14, '#c8ffb4', 0.5); star(s.x, s.y, 6, 0.3, 5, '#d8ffc8', 0); }
+    if (dark > 0) { // lights out: a night shade over everything, thickest where the room was brightest
+      const shade = bg && this.shade(bg);
+      ctx.globalAlpha = dark;
+      if (shade) { const s = Math.max(W / bg.naturalWidth, H / bg.naturalHeight), w = bg.naturalWidth * s, h = bg.naturalHeight * s; ctx.drawImage(shade, (W - w) / 2, (H - h) / 2, w, h); }
+      else rect(0, 0, W, H, 'rgba(8,10,32,0.8)');
       ctx.globalAlpha = 1;
     }
     if (A.on('glowstars')) {
