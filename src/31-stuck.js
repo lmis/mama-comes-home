@@ -25,9 +25,9 @@ class StuckPage extends StoryPage {
   }
   // the train home: rolls in, waits at the platform, then pulls away
   trainX(k) {
-    if (k < 2.6) return lerp(-900, 1180, 1 - Math.pow(1 - k / 2.6, 3));
-    if (k < 5.2) return 1180;
-    return 1180 + Math.pow((k - 5.2) / 1.8, 2) * 2300;
+    if (k < 2.6) return lerp(-1400, 1260, 1 - Math.pow(1 - k / 2.6, 3));
+    if (k < 5.2) return 1260;
+    return 1260 + Math.pow((k - 5.2) / 1.8, 2) * 3200;
   }
   tick(dt, t, A) {
     if (this.at('umbrella', 2.4)) { this.mama.do('cheer', 1.6); sfx('whee', 0.4, 1.2); this.st.drops(this.mama.x, 330, 26, 300, '#bfe6ff'); sfx('ding', 0.5, 0.9); }
@@ -69,8 +69,8 @@ class StuckPage extends StoryPage {
       rrect(860, 600, 180, 14, 5, '#8c6450'); line(880, 614, 880, 650, 6, '#3c3c50'); line(1020, 614, 1020, 650, 6, '#3c3c50');
     }
     if (bg && A.on('umbrella')) { // the train on the far track, behind Mama's platform
-      const k = 0.62, u = A.t('umbrella'), x = this.trainX(u);
-      push(0, 610, 0, k, k); drawTrainArt(x / k, 0, t, { moving: u < 2.6 || u > 5.2, cars: 2 }); pop();
+      const k = 1.05, u = A.t('umbrella'), x = this.trainX(u);
+      push(0, 616, 0, k, k); drawTrainArt(x / k, 0, t, { moving: u < 2.6 || u > 5.2, cars: 2 }); pop();
     }
     const cat = A.on('cat') ? A.t('cat') : -1;
     push(bg ? this.mama.x + 190 : 0, bg ? 704 : 0, 0, bg ? 0.95 : 1, bg ? 0.95 : 1); // the cat keeps dry next to Mama
