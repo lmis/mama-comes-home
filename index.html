@@ -63,10 +63,11 @@
     background: rgba(42,24,30,0.7); color: var(--paper); border: 2px solid rgba(255,250,240,0.45); }
   #loupe svg { width: 24px; height: 24px; }
   #loupe:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
-  body.loupe-on #loupe { opacity: 0; }
-  #lens { position: fixed; z-index: 7; display: none; pointer-events: none; width: 180px; height: 180px; border-radius: 50%;
+  body.loupe-on #loupe { opacity: 0.55; border-style: dashed; } /* the spot to drop it back */
+  #lens { position: fixed; z-index: 7; display: none; touch-action: none; cursor: grab; width: 190px; height: 190px; border-radius: 50%;
     border: 6px solid #f6eedd; box-shadow: 0 0 0 3px #46282f, 0 12px 30px rgba(0,0,0,0.5); background: #2a1a22; }
   body.loupe-on #lens { display: block; }
+  body.loupe-drag #lens { cursor: grabbing; }
   @media (max-height: 500px), (max-width: 520px) { #lens { width: 140px; height: 140px; } }
   #pages:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
   #menu { border: 0; border-radius: 22px; padding: 18px 20px 22px; width: min(1000px, calc(100vw - 32px)); max-height: calc(100vh - 32px); background: #3a2430; color: var(--paper); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
@@ -103,14 +104,17 @@
     .keys .turn { width: 56px; height: 56px; }
   }
   @media (orientation: landscape) and (max-height: 500px) {
-    body { flex-direction: row; gap: 14px; padding-block: 8px; }
-    .book { width: min(calc(100vw - 250px), calc((100vh - 20px) * 16 / 9)); }
-    .keys { display: grid; grid-template-columns: repeat(3, auto); gap: 10px 14px; justify-items: center; align-items: center; }
-    .acts { grid-column: 1 / -1; order: -1; grid-template-columns: repeat(2, auto); gap: 8px; }
-    .keys .act.pic { width: 92px; height: 52px; }
-    .keys .act { width: 92px; height: 36px; }
-    .keys .turn { width: 48px; height: 48px; }
-    #mute { margin-left: 0; }
+    body { flex-direction: row; gap: 10px; padding-block: 6px; padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
+    .book { width: min(calc(100vw - 170px), calc((100vh - 12px) * 16 / 9)); }
+    .keys { display: grid; grid-template-columns: repeat(3, auto); gap: 8px 6px; justify-items: center; align-items: center; }
+    .acts { grid-column: 1 / -1; order: -1; grid-template-columns: repeat(2, auto); gap: 6px; }
+    .keys .act.pic { width: 70px; height: 40px; border-width: 3px; }
+    .keys .act { width: 70px; height: 30px; }
+    .keys .turn { width: 42px; height: 42px; }
+    .keys .turn svg { width: 20px; height: 20px; }
+    #mute { margin-left: 0; width: 34px; height: 34px; }
+    #pages, #loupe { width: 36px; height: 36px; top: 6px; }
+    #pages svg, #loupe svg { width: 18px; height: 18px; }
   }
   @media (prefers-reduced-motion: reduce) { .keys button { transition: none; } }
 </style>
@@ -4179,11 +4183,12 @@ class TuckPage extends StoryPage {
   menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
   menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
   window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });
-  // the magnifying glass: drag it from its corner over the page to look closely; let go and it goes home
+  // the magnifying glass: drag it out of its corner over the page; it stays where it is put
+  // (and keeps showing the page moving) until it is dragged back into the corner
   const loupe = document.getElementById('loupe'), lens = document.getElementById('lens'), lg = lens.getContext('2d');
-  const ZOOM = 2.4;
-  let drag = null;
-  function lensAt(x, y) { // x, y: where the lens centre is, in screen pixels
+  const ZOOM = 3.6;
+  let glass = null, drag = null, dropped = 0; // glass: where the lens is; drag: the finger or mouse moving it
+  function lensAt(x, y) { // x, y: the lens centre, in screen pixels
     const size = lens.offsetWidth, dpr = Math.min(window.devicePixelRatio || 1, 2);
     if (lens.width !== size * dpr) lens.width = lens.height = size * dpr;
     lens.style.left = (x - size / 2) + 'px'; lens.style.top = (y - size / 2) + 'px';
@@ -4202,21 +4207,33 @@ class TuckPage extends StoryPage {
     ctx = keep;
   }
   function lensFrame() {
-    if (!drag) return;
-    lensAt(drag.x, drag.y);
+    if (!glass) return;
+    lensAt(glass.x, glass.y);
     requestAnimationFrame(lensFrame);
   }
-  function lensMove(e) { // on a touch screen the lens floats above the finger, so the finger doesn't hide it
-    drag.x = e.clientX; drag.y = e.clientY - (e.pointerType === 'touch' ? lens.offsetWidth * 0.7 : 0);
+  function home() { const r = loupe.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+  function startDrag(e, el, fromCorner) {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    // out of the corner on a touch screen, the lens floats above the finger so the finger doesn't hide it
+    const off = fromCorner ? [0, e.pointerType === 'touch' ? -lens.offsetWidth * 0.7 : 0] : [glass.x - e.clientX, glass.y - e.clientY];
+    drag = { id: e.pointerId, off };
+    if (!glass) { glass = { x: e.clientX + off[0], y: e.clientY + off[1] }; document.body.classList.add('loupe-on'); lensFrame(); }
+    document.body.classList.add('loupe-drag');
   }
-  loupe.addEventListener('pointerdown', e => {
-    e.preventDefault(); loupe.setPointerCapture(e.pointerId);
-    drag = {}; lensMove(e); document.body.classList.add('loupe-on'); lensFrame();
-  });
-  loupe.addEventListener('pointermove', e => { if (drag) lensMove(e); });
-  const lensOff = () => { drag = null; document.body.classList.remove('loupe-on'); canvas.focus(); };
-  loupe.addEventListener('pointerup', lensOff);
-  loupe.addEventListener('pointercancel', lensOff);
+  function moveDrag(e) { if (drag && e.pointerId === drag.id) { glass.x = e.clientX + drag.off[0]; glass.y = e.clientY + drag.off[1]; } }
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    drag = null; document.body.classList.remove('loupe-drag'); dropped = performance.now();
+    const [hx, hy] = home();
+    if (Math.hypot(glass.x - hx, glass.y - hy) < lens.offsetWidth * 0.6) { glass = null; document.body.classList.remove('loupe-on'); } // back in its corner
+  }
+  for (const [el, fromCorner] of [[loupe, true], [lens, false]]) {
+    el.addEventListener('pointerdown', e => { if (fromCorner && glass) return; startDrag(e, el, fromCorner); });
+    el.addEventListener('pointermove', moveDrag);
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+  }
+  loupe.addEventListener('click', () => { if (glass && !drag && performance.now() - dropped > 300) { glass = null; document.body.classList.remove('loupe-on'); } }); // a tap on the corner also puts it away
   requestAnimationFrame(frame);
 })();
 </script>

@@ -161,11 +161,12 @@
   menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
   menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
   window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });
-  // the magnifying glass: drag it from its corner over the page to look closely; let go and it goes home
+  // the magnifying glass: drag it out of its corner over the page; it stays where it is put
+  // (and keeps showing the page moving) until it is dragged back into the corner
   const loupe = document.getElementById('loupe'), lens = document.getElementById('lens'), lg = lens.getContext('2d');
-  const ZOOM = 2.4;
-  let drag = null;
-  function lensAt(x, y) { // x, y: where the lens centre is, in screen pixels
+  const ZOOM = 3.6;
+  let glass = null, drag = null, dropped = 0; // glass: where the lens is; drag: the finger or mouse moving it
+  function lensAt(x, y) { // x, y: the lens centre, in screen pixels
     const size = lens.offsetWidth, dpr = Math.min(window.devicePixelRatio || 1, 2);
     if (lens.width !== size * dpr) lens.width = lens.height = size * dpr;
     lens.style.left = (x - size / 2) + 'px'; lens.style.top = (y - size / 2) + 'px';
@@ -184,20 +185,32 @@
     ctx = keep;
   }
   function lensFrame() {
-    if (!drag) return;
-    lensAt(drag.x, drag.y);
+    if (!glass) return;
+    lensAt(glass.x, glass.y);
     requestAnimationFrame(lensFrame);
   }
-  function lensMove(e) { // on a touch screen the lens floats above the finger, so the finger doesn't hide it
-    drag.x = e.clientX; drag.y = e.clientY - (e.pointerType === 'touch' ? lens.offsetWidth * 0.7 : 0);
+  function home() { const r = loupe.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+  function startDrag(e, el, fromCorner) {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    // out of the corner on a touch screen, the lens floats above the finger so the finger doesn't hide it
+    const off = fromCorner ? [0, e.pointerType === 'touch' ? -lens.offsetWidth * 0.7 : 0] : [glass.x - e.clientX, glass.y - e.clientY];
+    drag = { id: e.pointerId, off };
+    if (!glass) { glass = { x: e.clientX + off[0], y: e.clientY + off[1] }; document.body.classList.add('loupe-on'); lensFrame(); }
+    document.body.classList.add('loupe-drag');
   }
-  loupe.addEventListener('pointerdown', e => {
-    e.preventDefault(); loupe.setPointerCapture(e.pointerId);
-    drag = {}; lensMove(e); document.body.classList.add('loupe-on'); lensFrame();
-  });
-  loupe.addEventListener('pointermove', e => { if (drag) lensMove(e); });
-  const lensOff = () => { drag = null; document.body.classList.remove('loupe-on'); canvas.focus(); };
-  loupe.addEventListener('pointerup', lensOff);
-  loupe.addEventListener('pointercancel', lensOff);
+  function moveDrag(e) { if (drag && e.pointerId === drag.id) { glass.x = e.clientX + drag.off[0]; glass.y = e.clientY + drag.off[1]; } }
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    drag = null; document.body.classList.remove('loupe-drag'); dropped = performance.now();
+    const [hx, hy] = home();
+    if (Math.hypot(glass.x - hx, glass.y - hy) < lens.offsetWidth * 0.6) { glass = null; document.body.classList.remove('loupe-on'); } // back in its corner
+  }
+  for (const [el, fromCorner] of [[loupe, true], [lens, false]]) {
+    el.addEventListener('pointerdown', e => { if (fromCorner && glass) return; startDrag(e, el, fromCorner); });
+    el.addEventListener('pointermove', moveDrag);
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+  }
+  loupe.addEventListener('click', () => { if (glass && !drag && performance.now() - dropped > 300) { glass = null; document.body.classList.remove('loupe-on'); } }); // a tap on the corner also puts it away
   requestAnimationFrame(frame);
 })();
