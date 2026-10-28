@@ -7,6 +7,7 @@ class MeetingPage extends OfficePage {
       who: ['Meeting', 'Robots', 'Mama'],
       durs: { slides: 3, chart: 3, cuckoo: 2, snooze: 4, clap: 2, photo: 3, idea: 2.4, thumbs: 2.2 } });
     this.robots = [new Robot(this, 0, 560), new Robot(this, 1, 820), new Robot(this, 2, 1080)];
+    [[442, 476], [642, 476], [848, 476]].forEach(([x, y], i) => { this.robots[i].x = x; this.robots[i].baseY = y; }); // behind the table
     this.mama.x = 230; this.mama.y = 680; this.mama.face = 1;
     this.slide = 0;
   }
@@ -62,6 +63,7 @@ class MeetingPage extends OfficePage {
     if (!bg) rrect(420, 500, 820, 30, 12, '#c8965a'); if (!bg) line(460, 530, 460, 620, 12, '#a0703c'); if (!bg) line(1200, 530, 1200, 620, 12, '#a0703c');
     if (!bg) for (const x of [560, 820, 1080]) { rrect(x - 30, 480, 34, 22, 4, '#fff6dc'); rrect(x + 10, 486, 30, 16, 3, WHITE, 1.5); }
     this.robots.forEach(r => r.drawArms());
+    const front = art('bg-07-front'); if (bg && front) { const k = W / bg.naturalWidth; ctx.drawImage(front, 0, 540 * k, front.naturalWidth * k, front.naturalHeight * k); } // table and near chairs
     if (!bg) {
       // Mama's desk with the photo frame
       rrect(150, 520, 200, 24, 8, '#a0703c'); line(170, 544, 170, 620, 10, '#8c5a3c'); line(330, 544, 330, 620, 10, '#8c5a3c');

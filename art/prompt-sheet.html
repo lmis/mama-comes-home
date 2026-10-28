@@ -79,7 +79,7 @@
 <div class="wrap">
   <header class="block">
     <h1>Mama Comes Home: art prompts</h1>
-    <p class="lede">One sheet is still missing: the last one, with Papa’s push cart, the frying pan and the little effects. The others are in the book and kept in case a piece needs redoing. Everything already in the book is at the bottom. Each “Copy prompt” button copies one complete prompt, ready to paste into your image AI.</p>
+    <p class="lede">One sheet is still missing: the dinner food. The others are in the book and kept in case a piece needs redoing. Everything already in the book is at the bottom. Each “Copy prompt” button copies one complete prompt, ready to paste into your image AI.</p>
   </header>
 
   <section class="block" aria-labelledby="props-h">
@@ -318,6 +318,9 @@
     { name: 'Last sheet: push cart, pan and little effects', file: 'sheet-last.png', page: 'Page 5, Papa’s street', todo: true,
       what: 'A) a children’s push cart for two small kids, seen exactly from the side facing right: an open, sturdy wooden or fabric box seat that two toddlers sit inside, with a tall push handle at the back for a grown-up, not a stroller and not a shopping trolley, drawn without its wheels; B) one big wheel for it, seen from the side; C) a frying pan seen from the side, handle to the left; D) a golden pancake seen from the side, and the same pancake seen from above; E) little effects, each on its own: a soft red heart, a sparkly yellow star, a music note, a sleepy letter Z, a puff of white steam, a soap bubble, a raindrop, a few paper confetti pieces',
       use: 'Papa pushes the twins in the push cart and flips the pancake; the effects replace the hearts, sparkles, notes, Zs, puffs, bubbles and drops the book still draws.' },
+    { name: 'Dinner sheet', file: 'sheet-dinner.png', page: 'Page 9, dinner', todo: true,
+      what: 'A) two small bowls of yellow noodles, seen from the side at eye level; B) a single long noodle strand, wavy, on its own; C) a white bowl of shiny red cherry tomatoes; D) one cherry tomato on its own; E) one squished tomato splat; F) a fruit bowl with a banana, an apple, grapes and an orange; G) the banana, the apple, the grapes and the orange each on their own; H) a child’s spoon',
+      use: 'The dinner table gets its food: noodles to slurp, tomatoes that squirt, fruit that hops and gets juggled, the spoon airplane.' },
   ];
   PROPS.forEach((c, i) => { c.n = String(i + 1); c.size = '2560 × 2560'; c.text = `${PROP} This is a character and prop sheet: keep every piece clearly separate, label nothing. The pieces: ${c.what}. Match the colours and light of the attached background. Plain flat white background, no shadow on the ground, nothing cropped at the edges.`; c.adds = c.use; c.clear = 'Attach: ' + c.page + '. Gaps between all pieces.'; });
   charCards('props', PROPS, 'props');
