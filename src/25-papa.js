@@ -47,7 +47,7 @@ class PapaPage extends StoryPage {
     const s = this.scroll;
     const bg = art(this.name === 'papa' ? 'bg-05-street-morning' : 'bg-08-street-sunset');
     if (bg) { // the painting scrolls past, every other copy mirrored so the edges meet
-      const sc = H / bg.naturalHeight, w = bg.naturalWidth * sc, off = (s * 0.6) % (2 * w);
+      const sc = H / bg.naturalHeight, w = bg.naturalWidth * sc, dir = this.homeward ? -1 : 1, off = ((dir * s * 0.6) % (2 * w) + 2 * w) % (2 * w);
       for (let i = -1; i < 3; i++) {
         const x = i * w - off;
         if (x > W || x + w < 0) continue;

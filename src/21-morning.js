@@ -37,7 +37,6 @@ class MorningPage extends StoryPage {
       else if (k.stage === 2 && this.mama.tx === null) { this.mama.face = 1; this.kiss = null; }
     }
     if (this.at('pancake', 1.6)) { sfx('tick', 0.6, 0.5); st.say('FLIP!', 1010, 380, 52, '#ffd25a'); }
-    if (this.every('steam', 0.9)) st.puff(570 + rnd(-30, 30), 500, 6, '#ffffff', 0, { vy: -30 });
   }
   draw() {
     const st = this.st, t = st.t, A = this.acts;

@@ -9,6 +9,7 @@ class PickupPage extends PapaPage {
     this.sky = ['#f39a6e', '#ffb98a', '#ffe0a8'];
     this.cloudCol = '#ffd6c8'; this.treeCol = '#4e8a5a'; this.litWindows = true;
     this.speed = 260;
+    this.homeward = true; // riding home: everything goes the other way
   }
   act(a) {
     if (a === 'papa') { this.leo.do('cheer', 2.2); this.louis.do('cheer', 2.2); this.st.say('PAPA!', 560, 400, 64, '#ffd25a'); this.st.hearts(this.papa.x + 120, 520, 4); sfx('giggle', 1, 1.1); sfx('hug', 0.6); return; }
@@ -25,8 +26,12 @@ class PickupPage extends PapaPage {
     const A = this.acts;
     if (A.on('ramp')) { const x = W + 100 - A.t('ramp') * 700; if (!painted) poly([x, 652, x + 160, 652, x + 160, 600], '#e6b46e'); }
     if (A.on('puddle')) { const x = W + 100 - A.t('puddle') * 760; if (!paintedPuddle(x, 660, 220)) ell(x, 660, 90, 14, '#e6a07a', 2.5); }
+    // mirror the gang and its glowing trail so they ride the other way, home
+    push(W, 0, 0, -1, 1);
     st.draw(0);
     this.drawGang(t);
-    st.draw(1); st.draw(2); st.drawWords();
+    st.draw(1); st.draw(2);
+    pop();
+    st.drawWords();
   }
 }
