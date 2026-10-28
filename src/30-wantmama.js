@@ -71,7 +71,8 @@ class WantMamaPage extends StoryPage {
       const [hx, hy] = this.papa.hand || this.papa.head(), d = this.papa.face;
       const k = clamp(A.t('phone') * 4, 0, 1);
       push(hx + d * 6, hy - 10, d * 8, k, k);
-      rrect(-34, -66, 68, 120, 12, '#2c2c3c', 3); rrect(-28, -58, 56, 100, 7, '#ffe6f0', 0);
+      const ph = art('prop-phone');
+      if (ph) ctx.drawImage(ph, -36, -70, 72, 72 * ph.naturalHeight / ph.naturalWidth); else { rrect(-34, -66, 68, 120, 12, '#2c2c3c', 3); rrect(-28, -58, 56, 100, 7, '#ffe6f0', 0); }
       const on = clamp((A.t('phone') - 0.8) * 3, 0, 1);
       if (on > 0) { ctx.globalAlpha = on; push(0, 0, 0, -0.5 * d, 0.5); drawFace(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, open: 0.3 + 0.3 * Math.sin(t * 20) }); pop(); ctx.globalAlpha = 1; }
       else if (Math.sin(t * 30) > 0) circ(0, -8, 10, '#8ce678', 0); // ringing
