@@ -13,7 +13,12 @@ class StationPage extends StoryPage {
     const st = this.st;
     if (a === 'whistle') { sfx('choo', 1); st.say('TOOT TOOT!', 1020, 300, 60, WHITE); }
     if (a === 'chug') sfx('chug', 1);
-    if (a === 'leave') { sfx('choo', 0.8); sfx('chug', 1); st.say('OFF WE GO!', 900, 300, 56, '#ffd25a'); }
+    if (a === 'leave') { // off it goes and stays gone; press again and it comes back
+      if (this.away === undefined || this.away === null) this.away = false;
+      this.away = !this.away; this.moveT = 0;
+      sfx('choo', 0.8); sfx('chug', 1);
+      st.say(this.away ? 'OFF WE GO!' : 'HERE IT COMES!', 900, 300, 56, '#ffd25a');
+    }
     if (a === 'conductor') { sfx('whistle', 0.6, 1.6); st.say('ALL ABOARD!', 220, 360, 48, '#ffd25a'); }
     if (a === 'pigeons') { sfx('flutter', 1); sfx('coo', 0.6); }
     if (a === 'clock') { [0, 0.5, 1].forEach(d => setTimeout(() => sfx('ding', 0.7, 0.6), d * 1000)); st.say('DONG!', 420, 230, 46, '#ffe0b4'); }
@@ -24,11 +29,12 @@ class StationPage extends StoryPage {
   tick(dt, t, A) {
     const st = this.st;
     this.trainX = 1120 + (A.on('chug') ? Math.sin(Math.PI * clamp(A.t('chug') / 3, 0, 1)) * 60 : 0);
-    if (A.on('leave')) { // pull away slowly, speed up and off to the right; then the next train rolls in
-      const k = A.t('leave');
-      if (k < 4) this.trainX += 30 * k * k * k;
-      else this.trainX = 1120 - 2600 * Math.pow(1 - ease((k - 4.5) / 3.3), 2) * (k < 4.5 ? 1 : 1);
-      this.moving = k < 7.6;
+    this.moveT = (this.moveT ?? 9) + dt;
+    const k = this.moveT;
+    if (this.away) { // pull away slowly, speed up, and off to the right for good
+      this.trainX = 1120 + 30 * k * k * k; this.moving = this.trainX < 3800;
+    } else if (this.away === false && k < 4) { // roll back in from the left and ease to a stop
+      this.trainX = 1120 - 2600 * Math.pow(1 - ease(k / 4), 2); this.moving = k < 3.9;
     } else this.moving = A.on('chug');
   }
   draw() {
@@ -50,8 +56,8 @@ class StationPage extends StoryPage {
     drawRails(590);
     }
     // the train, with Mama at a window
-    const peek = A.on('peek') ? Math.sin(Math.PI * clamp(A.t('peek') / 2.4, 0, 1)) : 0;
-    const waving = A.on('wave'), kissing = A.on('kiss');
+    const peek = 0;
+    const waving = A.on('wave'), kissing = false;
     drawTrainArt(this.trainX + 60, ry, t, { moving: this.moving, cars: 2, window: { car: 0, seat: 1, draw: (x, y) => {
       const head = rigImg(MAMA_RIG, kissing ? 'head-kiss' : waving ? 'head-talk' : 'head-happy');
       if (head && rigReady(MAMA_RIG)) {
@@ -68,11 +74,13 @@ class StationPage extends StoryPage {
         if (waving) line(x - 18, y + 4, x - 36 + Math.sin(t * 14) * 6, y - 40, 6, MAMA_COLS.body);
       }
     } } });
+    // the platform pole stands in front of the train
+    const pole = art('bg-02-pole'); if (bg && pole) { const k2 = W / bg.naturalWidth; ctx.drawImage(pole, 1500 * k2, 0, pole.naturalWidth * k2, pole.naturalHeight * k2); }
     // platform in front
     if (!bg) { rect(0, 620, W, H - 620, grad(0, 620, 0, H, ['#d9cfc4', '#c4b8ab'])); rect(0, 616, W, 8, '#ffd25a'); }
     // the conductor robot
     const c = A.on('conductor') ? A.t('conductor') : -1;
-    if (robotReady()) { // the painted robot as conductor, cap on, whistle up
+    if (art('bg-02-station')) {} else if (robotReady()) {
       ctx.save(); ctx.filter = ROBOT_TINT[0];
       pic(robotArt('body'), 200, 668, 104); pic(robotArt(c >= 0 ? 'head-talk' : 'head-happy'), 196, 590, 92);
       ctx.restore();

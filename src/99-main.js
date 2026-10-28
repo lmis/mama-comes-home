@@ -64,7 +64,7 @@
     if (Book.cur === 0) {
       const a = 0.75 + 0.25 * Math.sin(t * 3);
       ctx.globalAlpha = a;
-      word(AU.ctx ? 'Press  →  to open the book' : 'Press any key to start', 640, 398, 30, 0, '#fff3a0');
+      word('Press  →  to open the book', 640, 398, 30, 0, '#fff3a0');
       ctx.globalAlpha = 1;
     }
   }
@@ -78,9 +78,7 @@
 
   // ---- input ----
   function act(k) {
-    const first = !AU.ctx;
     audioStart();
-    if (first && Book.cur === 0 && k !== 'next') return; // the first press just wakes the sound
     if (k === 'next') Book.go(1);
     else if (k === 'prev') Book.go(-1);
     else if (typeof k === 'number') Book.pressButton(k);
