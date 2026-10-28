@@ -17,7 +17,7 @@ class TuckPage extends StoryPage {
     const st = this.st;
     if (a === 'mobile') sfx('chime', 1);
     if (a === 'glowstars') sfx('shimmer', 0.7);
-    if (a === 'lamp') { this.lightsOff = !this.lightsOff; sfx('click', 1, this.lightsOff ? 0.6 : 0.8); } // press again to switch them back on
+    if (a === 'lamp') { this.lightsOff = !this.lightsOff; if (this.lightsOff && this.endT === undefined) this.endT = 0; sfx('click', 1, this.lightsOff ? 0.6 : 0.8); } // press again to switch them back on
     if (a === 'yawn') { sfx('yawn', 0.8, 1.5); setTimeout(() => sfx('yawn', 0.8, 1.3), 300); st.say('YAWN!', 640, 380, 50, '#cfe0ff'); }
     if (a === 'giggle') { sfx('giggle', 1, 1.2); st.hearts(...this.pillow(0), 2); st.hearts(...this.pillow(1), 2); }
     if (a === 'sleep') sfx('snore', 0.6);
@@ -113,7 +113,7 @@ class TuckPage extends StoryPage {
       ctx.globalAlpha = 1;
     }
     st.draw(0); st.draw(1); st.draw(2);
-    if (t > 16) word('The End', 1130, 680, 34 * Math.min(1, (t - 16)), -4, '#ffe9b4');
+    if (this.endT !== undefined) { this.endT += this.dt; word('The End', 1110, 670, 40 * ease(this.endT / 1.2), -4, '#ffe9b4'); } // once the lights go out, the end stays
     st.drawWords();
   }
 }
