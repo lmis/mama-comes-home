@@ -101,6 +101,15 @@ function drawTrolley(x, y, t, kids, spin = t * 14) {
   for (let j = 1; j < 3; j++) { const yy = top + j * (y - 22 - top) / 3; ctx.beginPath(); ctx.moveTo(x + j * 5, yy); ctx.lineTo(x + tl - j * 5, yy); ctx.stroke(); }
   rrect(x - 4, top - 6, tl + 8, 10, 5, '#e6505a');
 }
+// a phone held up for a video call, with someone's face on the screen once it connects
+function drawPhone(x, y, rot, s, d, t, on, rig, cols, look = {}) {
+  const ph = art('prop-phone');
+  push(x, y, rot, s, s);
+  if (ph) ctx.drawImage(ph, -36, -70, 72, 72 * ph.naturalHeight / ph.naturalWidth); else { rrect(-34, -66, 68, 120, 12, '#2c2c3c', 3); rrect(-28, -58, 56, 100, 7, '#ffe6f0', 0); }
+  if (on > 0) { ctx.globalAlpha = on; push(0, 0, 0, -0.5 * d, 0.5); drawFace(rig, Object.assign({ t, cols, open: 0.3 + 0.3 * Math.sin(t * 20) }, look)); pop(); ctx.globalAlpha = 1; }
+  else if (Math.sin(t * 30) > 0) circ(0, -8, 10, '#8ce678', 0); // ringing
+  pop();
+}
 // rain streaks over the whole page
 function drawRain(t, amount, col = 'rgba(200,220,255,0.55)') {
   ctx.strokeStyle = col; ctx.lineWidth = 2;

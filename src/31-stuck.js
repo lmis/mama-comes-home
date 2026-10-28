@@ -5,7 +5,7 @@ class StuckPage extends StoryPage {
       text: 'Mama is at the station, but the dino train is late. Drip, drop goes the rain. “Oh dear,” says Mama. “Léo and Louis are waiting.”',
       tricks: [['board', 'thunder', 'downpour'], ['cat', 'announce', 'frog'], ['sigh', 'phone', 'umbrella']],
       who: ['Rainy station', 'Station', 'Mama'],
-      durs: { board: 2.4, thunder: 2, downpour: 4, cat: 2, announce: 3, frog: 1.6, sigh: 2.4, umbrella: 2, phone: 3 } });
+      durs: { board: 2.4, thunder: 2, downpour: 4, cat: 2, announce: 3, frog: 1.6, sigh: 2.4, umbrella: 2, phone: 3.2 } });
     this.mama = mama(this.st, { x: 620, y: 650, face: -1, look: { bow: true, bag: true } });
     this.cast = [this.mama];
     this.frogPos = 0;
@@ -32,7 +32,7 @@ class StuckPage extends StoryPage {
     const st = this.st, t = st.t, A = this.acts;
     const flash = A.on('thunder') ? Math.max(0, 1 - A.t('thunder') * 3) * (Math.sin(A.t('thunder') * 40) > 0 ? 1 : 0.4) : 0;
     const bg = art('bg-11-stuck'); if (bg) drawArt(bg);
-    if (bg && !this.placed) { this.placed = true; Object.assign(this.mama, { x: 600, y: 702, scale: 1.1 }); } // on the near platform, under her umbrella
+    if (bg && !this.placed) { this.placed = true; Object.assign(this.mama, { x: 600, y: 706, scale: 1.35 }); } // on the near platform, under her umbrella
     if (!bg) {
       rect(0, 0, W, H, grad(0, 0, 0, H, ['#1a1e40', '#2c3260', '#3a3f6e']));
       drawCity(t, 520, '#262a52', 0.4, 4);
@@ -91,6 +91,10 @@ class StuckPage extends StoryPage {
     paint('#ff8cb4', 3);
     for (let i = 1; i < 6; i++) line(0, -110 + 0, -110 + i * 220 / 6, 0, 2, '#e66a96', 0);
     pop();
+    }
+    if (A.on('phone')) { // Mama's phone, held up in front of her face, with Papa on the screen
+      const [hx, hy] = this.mama.head(), d = this.mama.face, pt = A.t('phone');
+      drawPhone(hx + d * 22, hy + 62, d * 12, clamp(pt * 4, 0, 1) * 0.8, d, t, clamp((pt - 0.6) * 3, 0, 1) * clamp((3 - pt) * 3, 0, 1), PAPA_RIG, PAPA_COLS, { helmet: true });
     }
     if (!bg || A.on('downpour')) drawRain(t, bg ? 1.2 : A.on('downpour') ? 2.2 : 1.1); // the painting already rains
     if (flash) { ctx.globalAlpha = flash * 0.5; rect(0, 0, W, H, '#ffffff'); ctx.globalAlpha = 1; }

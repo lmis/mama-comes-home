@@ -29,7 +29,7 @@ class WantMamaPage extends StoryPage {
     if (this.at('phone', 1.2)) { st.say('I’M COMING, MY LOVES!', 760, 300, 42, '#d2b4ff'); this.leo.do('cheer', 1.6); this.louis.do('cheer', 1.6); }
     if (this.at('cuddle', 1.2)) { st.hearts(470, 480, 6); this.leo.do('laugh'); this.louis.do('laugh'); }
     if (this.at('cuddle', 2.4)) this.papa.walkTo(860, 200);
-    if (A.on('cuddle') && this.papa.tx === null && A.t('cuddle') > 2.4) this.papa.face = -1;
+    if (this.papa.tx === null && !(A.on('cuddle') && A.t('cuddle') < 2.4)) this.papa.face = -1; // back in his spot, facing the twins again
     if (A.on('want') && this.every('tear', 0.4)) for (const k of [this.leo, this.louis]) { const [hx, hy] = k.head(); st.add({ kind: 'drop', layer: 2, x: hx - k.face * 6, y: hy + 6, vx: 0, vy: 20, size: 3, col: '#9ad8ff', life: 0.7, g: 300 }); }
   }
   draw() {
@@ -69,14 +69,7 @@ class WantMamaPage extends StoryPage {
     this.leo.draw(); this.louis.draw(); this.papa.draw({ reach: A.on('phone') });
     if (A.on('phone')) { // Papa holds out his phone, and there is Mama on the screen
       const [hx, hy] = this.papa.hand || this.papa.head(), d = this.papa.face;
-      const k = clamp(A.t('phone') * 4, 0, 1);
-      push(hx + d * 6, hy - 10, d * 8, k, k);
-      const ph = art('prop-phone');
-      if (ph) ctx.drawImage(ph, -36, -70, 72, 72 * ph.naturalHeight / ph.naturalWidth); else { rrect(-34, -66, 68, 120, 12, '#2c2c3c', 3); rrect(-28, -58, 56, 100, 7, '#ffe6f0', 0); }
-      const on = clamp((A.t('phone') - 0.8) * 3, 0, 1);
-      if (on > 0) { ctx.globalAlpha = on; push(0, 0, 0, -0.5 * d, 0.5); drawFace(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, open: 0.3 + 0.3 * Math.sin(t * 20) }); pop(); ctx.globalAlpha = 1; }
-      else if (Math.sin(t * 30) > 0) circ(0, -8, 10, '#8ce678', 0); // ringing
-      pop();
+      drawPhone(hx + d * 6, hy - 10, d * 8, clamp(A.t('phone') * 4, 0, 1), d, t, clamp((A.t('phone') - 0.8) * 3, 0, 1) * clamp((4 - A.t('phone')) * 3, 0, 1), MAMA_RIG, MAMA_COLS, { bow: true });
     }
     if (A.on('story') && !bg) { const [hx, hy] = this.papa.head(); poly([hx - 90, hy + 50, hx - 40, hy + 40, hx - 40, hy + 80, hx - 90, hy + 86], '#fffaf0'); poly([hx - 40, hy + 40, hx + 10, hy + 50, hx + 10, hy + 86, hx - 40, hy + 80], '#fffaf0'); }
     this.finish();
