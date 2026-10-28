@@ -124,33 +124,19 @@ function pic(im, x, y, w, flip = false, rot = 0) {
 const allArt = (...n) => n.every(x => art(x));
 // a pigeon (grey-ish colours) or a songbird, facing right unless face < 0;
 // flap is null when standing, otherwise the wings beat with it
-let WING_ROT = 0.35, WING_PIV = [0.15, 0.3]; // open wing: turn, and where its shoulder is
+// where each bird picture's eye sits, so the flying pictures line up as they swap
+const FLY_EYE = { 'pigeon-up': [130, 68], 'pigeon-down': [124, 15], 'bird-up': [106, 57], 'bird-down': [123, 20] };
 function paintedBird(x, y, s, flap, col, face = 1) {
   const kind = col === '#a0a0c8' ? 'pigeon' : 'bird';
-  if (!allArt(`${kind}-body`, `${kind}-head`, `${kind}-wing`, `${kind}-wing-open`)) return false;
-  const k = s * (kind === 'pigeon' ? 0.7 : 0.6);
-  const body = art(`${kind}-body`), head = art(`${kind}-head`), bw = body.naturalWidth, bh = body.naturalHeight;
+  if (!allArt(`fly-${kind}-stand`, `fly-${kind}-up`, `fly-${kind}-down`)) return false;
+  const k = s * (kind === 'pigeon' ? 0.62 : 0.5);
   ctx.save(); ctx.translate(x, y + 8); ctx.scale(face * k, k);
-  if (flap === null) { // perched: folded wing
-    ctx.drawImage(body, -bw / 2, -bh, bw, bh);
-    ctx.drawImage(head, bw * 0.08, -bh * 1.32, head.naturalWidth, head.naturalHeight);
-    const w = art(`${kind}-wing`);
-    ctx.drawImage(w, -bw * 0.05 - w.naturalWidth * 0.7, -bh * 0.6 - w.naturalHeight * 0.4, w.naturalWidth, w.naturalHeight);
-    ctx.restore(); return true;
+  if (flap === null) { // standing, feet on the ground
+    const im = art(`fly-${kind}-stand`); ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight);
+  } else { // flying: swap between wings up and wings down, eye held in place
+    const n = `${kind}-${Math.sin(flap) > 0 ? 'up' : 'down'}`, im = art('fly-' + n), [ex, ey] = FLY_EYE[n];
+    ctx.drawImage(im, 40 - ex, -90 - ey + Math.sin(flap) * 4);
   }
-  // flying: body leans forward, both wings beat up and down from the shoulder
-  ctx.translate(0, -bh * 0.5); ctx.rotate(0.35); ctx.translate(0, bh * 0.5);
-  const w = art(`${kind}-wing-open`), ww = w.naturalWidth, wh = w.naturalHeight;
-  const beat = Math.sin(flap), sx = -bw * 0.02, sy = -bh * 0.62;
-  const wing = (lift, dark) => { // the open wing is painted upside down: turn it over, shoulder on the bird's side
-    ctx.save(); ctx.translate(sx, sy); ctx.scale(1, lift); ctx.rotate(Math.PI + WING_ROT);
-    if (dark) ctx.filter = 'brightness(0.75)';
-    ctx.drawImage(w, -ww * WING_PIV[0], -wh * WING_PIV[1], ww, wh); ctx.restore();
-  };
-  wing(0.15 + 0.85 * Math.sin(flap - 0.5), true); // far wing, a touch behind in time
-  ctx.drawImage(body, -bw / 2, -bh, bw, bh);
-  ctx.drawImage(head, bw * 0.08, -bh * 1.32, head.naturalWidth, head.naturalHeight);
-  wing(0.15 + 0.85 * beat, false);
   ctx.restore();
   return true;
 }
