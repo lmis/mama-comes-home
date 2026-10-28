@@ -485,8 +485,8 @@ function drawRig(rig, o) {
 function drawRigSkate(rig, legKey, t, spin = t * 12, dark = 0) {
   const boot = rigImg(rig, 'boot'), wheel = rigImg(rig, 'wheel');
   // big enough to swallow the whole foot, toes and all
-  const [lx] = rig.at[legKey], bw = boot.naturalWidth * 1.22, bh = boot.naturalHeight * 1.22;
-  const bx = lx - 10, by = -bh + 26;
+  const [lx] = rig.at[legKey], bw = boot.naturalWidth * 1.34, bh = boot.naturalHeight * 1.34;
+  const bx = lx - 16, by = -bh + 30;
   for (let i = 0; i < 3; i++) {
     const wx = bx + 26 + i * (bw - 52) / 2, wy = by + bh + 6, r = 20;
     ctx.save(); ctx.translate(wx, wy);
