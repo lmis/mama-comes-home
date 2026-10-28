@@ -5,7 +5,7 @@ class StuckPage extends StoryPage {
       text: 'Mama is at the station, but the dino train is late. Drip, drop goes the rain. “Oh dear,” says Mama. “Léo and Louis are waiting.”',
       tricks: [['board', 'thunder', 'downpour'], ['cat', 'announce', 'frog'], ['sigh', 'phone', 'umbrella']],
       who: ['Rainy station', 'Station', 'Mama'],
-      durs: { board: 2.4, thunder: 2, downpour: 4, cat: 2, announce: 3, frog: 1.6, sigh: 2.4, umbrella: 2, phone: 3.2 } });
+      durs: { board: 2.4, thunder: 2, downpour: 4, cat: 2, announce: 3, frog: 1.6, sigh: 2.4, umbrella: 7, phone: 3.2 } });
     this.mama = mama(this.st, { x: 620, y: 650, face: -1, look: { bow: true, bag: true } });
     this.cast = [this.mama];
     this.frogPos = 0;
@@ -20,10 +20,17 @@ class StuckPage extends StoryPage {
     if (a === 'announce') { sfx('ding', 0.6, 0.8); setTimeout(() => sfx('ding', 0.6, 0.65), 250); st.say('THE TRAIN IS LATE. SORRY!', 640, 250, 38, '#ffe0b4'); }
     if (a === 'frog') { sfx('ribbit', 1); this.frogPos ^= 1; st.say('RIBBIT!', 340, 590, 40, '#8ce678'); }
     if (a === 'sigh') { this.mama.do('sad', 2.4); sfx('yawn', 0.4, 0.8); st.say('OH DEAR...', this.mama.x, 300, 48, '#c8d2ff'); }
-    if (a === 'umbrella') { this.mama.do('cheer', 1.4); sfx('whee', 0.4, 1.2); st.drops(this.mama.x, 330, 26, 300, '#bfe6ff'); }
+    if (a === 'umbrella') { sfx('toot', 0.7); setTimeout(() => sfx('toot', 0.7, 1.1), 350); sfx('train', 0.6); st.say('THE TRAIN IS COMING!', 640, 250, 46, '#ffd25a'); }
     if (a === 'phone') { this.mama.do('talk', 2.8); sfx('ring', 0.6, 1.2); st.say('I’M COMING, MY LOVES!', this.mama.x, 290, 42, '#d2b4ff'); st.hearts(this.mama.x, 400, 3); }
   }
+  // the train home: rolls in, waits at the platform, then pulls away
+  trainX(k) {
+    if (k < 2.6) return lerp(-900, 1180, 1 - Math.pow(1 - k / 2.6, 3));
+    if (k < 5.2) return 1180;
+    return 1180 + Math.pow((k - 5.2) / 1.8, 2) * 2300;
+  }
   tick(dt, t, A) {
+    if (this.at('umbrella', 2.4)) { this.mama.do('cheer', 1.6); sfx('whee', 0.4, 1.2); this.st.drops(this.mama.x, 330, 26, 300, '#bfe6ff'); sfx('ding', 0.5, 0.9); }
     if (this.at('board', 1)) this.st.say('DELAYED!', 900, 230, 50, '#ff8c8c');
     if (this.at('thunder', 0)) {}
     if (this.every('drip', 0.5)) this.st.add({ kind: 'drop', layer: 2, x: rnd(500, 740), y: 290, vx: 0, vy: 100, size: 3, col: '#bfe6ff', life: 0.8, g: 600 });
@@ -61,6 +68,10 @@ class StuckPage extends StoryPage {
     if (!bg) {
       rrect(860, 600, 180, 14, 5, '#8c6450'); line(880, 614, 880, 650, 6, '#3c3c50'); line(1020, 614, 1020, 650, 6, '#3c3c50');
     }
+    if (bg && A.on('umbrella')) { // the train on the far track, behind Mama's platform
+      const k = 0.62, u = A.t('umbrella'), x = this.trainX(u);
+      push(0, 610, 0, k, k); drawTrainArt(x / k, 0, t, { moving: u < 2.6 || u > 5.2, cars: 2 }); pop();
+    }
     const cat = A.on('cat') ? A.t('cat') : -1;
     push(bg ? this.mama.x + 190 : 0, bg ? 704 : 0, 0, bg ? 0.95 : 1, bg ? 0.95 : 1); // the cat keeps dry next to Mama
     const catDrawn = paintedCat(bg ? 0 : 960, bg ? 0 : 656, cat < 0 ? 'sleepy' : cat < 1.2 ? 'meow' : 'awake');
@@ -77,7 +88,7 @@ class StuckPage extends StoryPage {
     const fr = A.on('frog') ? A.t('frog') : -1;
     if (!paintedFrog(fx, (bg ? 700 : 676) - fj, fr >= 0 && fr < 0.6 ? 'jump' : fr >= 0.6 && fr < 1.6 ? 'croak' : 'sit')) { ell(fx, 664 - fj, 14, 10, '#8ce678'); circ(fx - 6, 654 - fj, 5, '#8ce678'); circ(fx + 6, 654 - fj, 5, '#8ce678'); circ(fx - 6, 653 - fj, 2, INK, 0); circ(fx + 6, 653 - fj, 2, INK, 0); }
     // Mama under her umbrella
-    const um = A.on('umbrella') ? A.t('umbrella') * 12 : 0;
+    const um = A.on('umbrella') && A.t('umbrella') > 2.4 && A.t('umbrella') < 4.2 ? (A.t('umbrella') - 2.4) * 12 : 0; // twirl when the train pulls in
     st.draw(0); st.draw(1);
     this.mama.draw();
     const ux = this.mama.x - 20, uy = 410 - (this.mama.is('surprise') ? 20 : 0);

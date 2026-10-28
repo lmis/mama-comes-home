@@ -14,7 +14,7 @@ const LABEL = {
   slides: 'Next slide', chart: 'Chart goes up', cuckoo: 'Cuckoo clock', snooze: 'Bolt snoozes', clap: 'Hooray!', photo: 'Look at the photo', idea: 'Good idea!', thumbs: 'Great job!',
   noodles: 'Noodles', tomato: 'Tomato squirt', fruit: 'Bouncy fruit', slurp: 'Slurp', moustache: 'Noodle moustache', yum: 'Yum yum', juggle: 'Juggle fruit', airplane: 'Spoon airplane', laugh: 'Laugh',
   moon: 'Peeking moon', rain: 'Rain on the window', want: 'We want Mama', window: 'Look outside', teddy: 'Hug teddy', phone: 'Call Mama', cuddle: 'Cuddle', story: 'Read a story',
-  board: 'Departure board', thunder: 'Thunder', downpour: 'Pouring rain', cat: 'Kitty', announce: 'Announcement', frog: 'Puddle frog', sigh: 'Oh dear', umbrella: 'Twirl the umbrella',
+  board: 'Departure board', thunder: 'Thunder', downpour: 'Pouring rain', cat: 'Kitty', announce: 'Announcement', frog: 'Puddle frog', sigh: 'Oh dear', umbrella: 'The train is coming!',
   boost: 'Rocket boost', shoot: 'Shooting star', fireworks: 'Fireworks', loop: 'Loop the loop', song: 'Robot song', wavemoon: 'Wave at the moon', wheee: 'Wheee!', hold: 'Hold on tight', point: 'There’s home!',
   door: 'Open the door', byebots: 'Bye, robots', chimney: 'Heart smoke', hug: 'Big hug', shh: 'Shhh',
   mobile: 'Spin the mobile', glowstars: 'Starry nightlight', lamp: 'Lights out / on', yawn: 'Big yawn', sleep: 'Fall asleep', sing: 'Sing the song', blanket: 'Tuck in',
