@@ -46,15 +46,19 @@
   #page:focus-visible { box-shadow: 0 0 0 4px var(--glow); }
   .keys { display: flex; align-items: center; justify-content: center; gap: 28px; max-width: 100%; }
   .acts { display: grid; grid-template-columns: repeat(3, auto); gap: 12px 16px; }
-  .keys button { border: 0; cursor: pointer; display: grid; place-items: center; padding: 0; }
+  .keys button { border: 0; cursor: pointer; display: grid; place-items: center; padding: 0; flex-shrink: 0; }
+  .keys .acts { min-width: 0; }
   .keys .act { width: 92px; height: 44px; border-radius: 14px; background: var(--c); box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 65%, #46282f); }
   .keys .turn { width: 64px; height: 64px; border-radius: 50%; background: var(--cap); color: var(--ink); box-shadow: 0 5px 0 var(--cap-edge), 0 8px 14px rgba(0,0,0,0.35); }
   .keys .turn svg { width: 30px; height: 30px; }
   .keys .act.pic { width: 132px; height: 74px; background-size: cover; background-position: center; border: 4px solid var(--c); }
   .keys button:disabled { opacity: 0.3; cursor: default; transform: none; }
   .keys button:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
-  #pages { width: 46px; height: 46px; border-radius: 50%; background: transparent; color: var(--paper); border: 2px solid rgba(255,250,240,0.35); box-shadow: none; }
+  #pages { position: fixed; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px));
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: pointer;
+    background: rgba(42,24,30,0.7); color: var(--paper); border: 2px solid rgba(255,250,240,0.45); }
   #pages svg { width: 22px; height: 22px; }
+  #pages:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
   #menu { border: 0; border-radius: 22px; padding: 18px 20px 22px; width: min(1000px, calc(100vw - 32px)); max-height: calc(100vh - 32px); background: #3a2430; color: var(--paper); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
   #menu::backdrop { background: rgba(20,10,16,0.6); }
   .menu-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -66,7 +70,7 @@
   .menu-grid button:hover, .menu-grid button:focus-visible { border-color: var(--paper); outline: none; }
   .menu-grid canvas { display: block; width: 100%; aspect-ratio: 16 / 9; margin-bottom: 6px; background: #2a1a22; }
   .menu-grid b { color: var(--glow); margin-right: 4px; }
-  @media (max-width: 520px) { .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } #pages { width: 36px; height: 36px; } }
+  @media (max-width: 520px) { .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   #mute { width: 46px; height: 46px; border-radius: 50%; background: transparent; color: var(--paper); border: 2px solid rgba(255,250,240,0.35); box-shadow: none; margin-left: -6px; }
   #mute svg { width: 24px; height: 24px; }
   #mute .cross { display: none; }
@@ -81,8 +85,18 @@
     .keys .turn svg { width: 22px; height: 22px; }
     #mute { width: 36px; height: 36px; }
   }
+  @media (max-width: 520px) { /* phones upright: the picture buttons get their own row, page turns and sound below */
+    .keys { flex-wrap: wrap; gap: 14px 28px; }
+    .acts { order: -1; flex-basis: 100%; justify-content: center; }
+    .keys .act.pic { width: 100px; height: 56px; }
+    .keys .act { width: 100px; height: 40px; }
+    .keys .turn { width: 56px; height: 56px; }
+  }
   @media (prefers-reduced-motion: reduce) { .keys button { transition: none; } }
 </style>
+<button type="button" id="pages" aria-haspopup="dialog" aria-label="Pick a page" title="Pick a page (P)" aria-keyshortcuts="P">
+    <svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><rect x="8" y="8" width="13" height="13" rx="3"/><rect x="27" y="8" width="13" height="13" rx="3"/><rect x="8" y="27" width="13" height="13" rx="3"/><rect x="27" y="27" width="13" height="13" rx="3"/></svg>
+  </button>
 <div class="book"><canvas id="page" tabindex="0" aria-label="Mama Comes Home, a picture book. Left and right arrows turn the pages; the colour buttons (or keys 1 to 6) make things happen."></canvas></div>
 <div class="keys">
   <button type="button" class="turn" data-key="prev" title="Back (Left arrow)" aria-label="Previous page" aria-keyshortcuts="ArrowLeft">
@@ -98,9 +112,6 @@
   </div>
   <button type="button" class="turn" data-key="next" title="Next page (Right arrow)" aria-label="Next page" aria-keyshortcuts="ArrowRight">
     <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 10 L34 24 L18 38" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-  <button type="button" id="pages" aria-haspopup="dialog" aria-label="Pick a page" title="Pick a page (P)" aria-keyshortcuts="P">
-    <svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><rect x="8" y="8" width="13" height="13" rx="3"/><rect x="27" y="8" width="13" height="13" rx="3"/><rect x="8" y="27" width="13" height="13" rx="3"/><rect x="27" y="27" width="13" height="13" rx="3"/></svg>
   </button>
   <button type="button" id="mute" aria-pressed="false" aria-label="Sound on" title="Sound">
     <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 19 H16 L26 10 V38 L16 29 H8 Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
