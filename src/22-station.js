@@ -9,9 +9,18 @@ class StationPage extends StoryPage {
     this.trainX = 1120;
     this.railY = () => art('bg-02-station') ? 508 : 598;
   }
+  // where to look for the button pictures: Mama's window when she waves, the engine when it toots
+  focus() {
+    const A = this.acts, ry = this.railY(), wx = this.trainX - 688;
+    if (A.on('wave')) return [[wx - 150, ry - 330], [wx + 150, ry - 60]];
+    if (A.on('whistle')) return [[this.trainX - 380, ry - 330], [this.trainX + 80, ry]];
+    if (A.on('pigeons')) return [[220, 380], [780, 680]];
+    if (A.on('leave')) return [[this.trainX - 700, ry - 330], [this.trainX + 80, ry]];
+    return [];
+  }
   act(a) {
     const st = this.st;
-    if (a === 'whistle') { sfx('choo', 1); st.say('TOOT TOOT!', 1020, 300, 60, WHITE); }
+    if (a === 'whistle') { sfx('choo', 1); st.say('TOOT TOOT!', 1020, 300, 60, WHITE); st.notes(this.trainX - 60, this.railY() - 250, 5); }
     if (a === 'chug') sfx('chug', 1);
     if (a === 'leave') { // off it goes and stays gone; press again and it comes back
       if (this.away === undefined || this.away === null) this.away = false;
@@ -22,7 +31,7 @@ class StationPage extends StoryPage {
     if (a === 'conductor') { sfx('whistle', 0.6, 1.6); st.say('ALL ABOARD!', 220, 360, 48, '#ffd25a'); }
     if (a === 'pigeons') { sfx('flutter', 1); sfx('coo', 0.6); }
     if (a === 'clock') { [0, 0.5, 1].forEach(d => setTimeout(() => sfx('ding', 0.7, 0.6), d * 1000)); st.say('DONG!', 420, 230, 46, '#ffe0b4'); }
-    if (a === 'wave') { sfx('giggle', 0.6, 1.2); st.say('BYE-BYE!', this.trainX - 380, this.railY() - 268, 50, '#d2b4ff'); }
+    if (a === 'wave') { sfx('giggle', 0.6, 1.2); st.say('BYE-BYE!', this.trainX - 690, this.railY() - 300, 50, '#d2b4ff'); }
     if (a === 'peek') sfx('squeak', 0.5, 1.2);
     if (a === 'kiss') { sfx('smooch', 1); for (let i = 0; i < 5; i++) st.add({ kind: 'heart', layer: 2, x: this.trainX - 380, y: this.railY() - 158, vx: -rnd(160, 260), vy: rnd(-60, 0), rot: 0, size: 11, col: '#ff6082', life: 2 }); }
   }

@@ -18,7 +18,7 @@
   resize();
 
   Book.init();
-  for (const p of Book.pages) if (reduce) p.reduce = true;
+  Book.reduce = reduce; for (const p of Book.pages) if (reduce) p.reduce = true;
 
   function prep(g) {
     ctx = g;
@@ -29,7 +29,7 @@
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
-    Book.update(dt);
+    if (!window.__freeze) Book.update(dt); // (the button-picture tool holds the book still while it takes a picture)
     if (Book.turn) {
       const tr = Book.turn, lo = Math.min(tr.from, tr.to), hi = Math.max(tr.from, tr.to);
       const k = ease(tr.t / tr.dur), e = tr.dir > 0 ? k : 1 - k;
@@ -105,8 +105,17 @@
     if (x < 0.12) act('prev'); else if (x > 0.88) act('next'); else if (!AU.ctx) audioStart();
   });
   let tapN = 0;
-  document.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => { act(+b.dataset.slot); canvas.focus(); }));
-  document.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => { act(b.dataset.key); flash(b.dataset.key); canvas.focus(); }));
+  // the buttons go the moment a finger lands on them, so long presses, slides and squashes all count;
+  // a click with no pointer (keyboard Enter or Space on a focused button) works too
+  function onPress(b, f) {
+    b.addEventListener('pointerdown', e => { if (e.button > 0) return; e.preventDefault(); f(); canvas.focus(); });
+    b.addEventListener('click', e => { if (e.detail === 0) f(); });
+  }
+  document.querySelectorAll('[data-slot]').forEach(b => onPress(b, () => act(+b.dataset.slot)));
+  document.querySelectorAll('[data-key]').forEach(b => onPress(b, () => act(b.dataset.key)));
+  // nothing a small hand does should select, copy, zoom or open a menu
+  for (const ev of ['contextmenu', 'selectstart', 'dragstart', 'gesturestart', 'dblclick']) document.addEventListener(ev, e => e.preventDefault(), { passive: false });
+  document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false }); // no pinch zoom
   function flash() {}
   // the page-turn buttons grey out at the ends of the book
   setInterval(() => {
@@ -125,7 +134,7 @@
     });
   }, 200);
   const mute = document.getElementById('mute');
-  mute.addEventListener('click', () => {
+  onPress(mute, () => {
     audioStart(); setMuted(!AU.muted);
     mute.setAttribute('aria-pressed', AU.muted ? 'true' : 'false');
     mute.setAttribute('aria-label', AU.muted ? 'Sound off' : 'Sound on');
@@ -157,7 +166,7 @@
   }
   // start decoding all the paintings early, so pages (and the menu) never show the stand-in drawings
   setTimeout(() => { if (typeof ART !== 'undefined') Object.keys(ART).forEach(n => art(n)); }, 1200);
-  pagesBtn.addEventListener('click', openMenu);
+  onPress(pagesBtn, openMenu);
   menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
   menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
   window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });

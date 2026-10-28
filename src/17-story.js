@@ -80,12 +80,11 @@ function drawRails(y, x0 = 0, x1 = W) {
 function drawTrolley(x, y, t, kids, spin = t * 14) {
   const tr = art('prop-trolley');
   if (tr) { // the painted trolley, handle at the back (left), twins inside the basket, red glow under the feet
-    const w = 250, h = w * tr.naturalHeight / tr.naturalWidth, x0 = x - 70, lift = 38;
+    const w = 250, h = w * tr.naturalHeight / tr.naturalWidth, x0 = x - 70, lift = 42; // lifted by the castors; the castor caps meet the frame's feet
     const ca = art('prop-castor'), cw = 36, ch = ca ? cw * ca.naturalHeight / ca.naturalWidth : 0;
-    for (const wx of [x0 + 46, x0 + 220]) glow(wx, y - 8, 34, '#ff3c3c', 0.45);
     for (const k of kids) k();
     ctx.drawImage(tr, x0, y - lift - h, w, h);
-    if (ca) for (const wx of [x0 + 46, x0 + 220]) ctx.drawImage(ca, wx - cw / 2, y - ch, cw, ch);
+    if (ca) for (const wx of [x0 + 53, x0 + 220]) ctx.drawImage(ca, wx - cw / 2, y - ch, cw, ch);
     return;
   }
   const tl = 150, top = y - 110;

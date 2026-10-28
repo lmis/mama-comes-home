@@ -22,6 +22,9 @@ const FRAMES = [0.35, 0.7, 1.1, 1.6, 2.3]; // seconds after the press
     await p.evaluate(i => { Book.turn = null; Book.cur = i; Book.pages[i].shown = 99; Book.pages[i].text = null; }, i);
     const names = await p.evaluate(() => Book.buttons());
     for (let j = 0; j < names.length; j++) {
+      // every button starts from the page as it is when you first arrive (the book resets pages on each visit too)
+      await p.evaluate(i => { const pg = Book.fresh(Book.pages[i].constructor); pg.shown = 99; pg.text = null; Book.pages[i] = pg; }, i);
+      await p.waitForTimeout(600);
       // wait for the page to settle: no trick running, nobody walking
       for (let k = 0; k < 100; k++) {
         // (characters that wander on their own, like the daycare kids, are only waited for briefly)
@@ -37,8 +40,13 @@ const FRAMES = [0.35, 0.7, 1.1, 1.6, 2.3]; // seconds after the press
         window.__pos = (pg.cast || []).map(c => [c.x, c.y, c.jy]); });
       await p.evaluate(j => Book.pressButton(j), j);
       let last = 0;
-      for (let f = 0; f < FRAMES.length; f++) {
-        await p.waitForTimeout((FRAMES[f] - last) * 1000); last = FRAMES[f];
+      // a page that knows its trick's best moment gets one picture, taken right then
+      const hasPeak = await p.evaluate(() => !!Book.page().peak);
+      if (hasPeak) for (let w = 0; w < 120 && !(await p.evaluate(() => Book.page().peak())); w++) await p.waitForTimeout(40);
+      for (let f = 0; f < (hasPeak ? 1 : FRAMES.length); f++) {
+        if (!hasPeak) { await p.waitForTimeout((FRAMES[f] - last) * 1000); last = FRAMES[f]; }
+        await p.evaluate(() => { window.__freeze = true; });
+        await p.waitForTimeout(50);
         await canvas.screenshot({ path: `${base}__${f + 1}.png` });
         // where the action is, in page units: new bits and words, and anyone acting or moving
         const focus = await p.evaluate(() => {
@@ -52,10 +60,12 @@ const FRAMES = [0.35, 0.7, 1.1, 1.6, 2.3]; // seconds after the press
               const h = 160 * c.scale; pts.push([c.x - 60 * c.scale, c.y + c.jy - h], [c.x + 60 * c.scale, c.y + c.jy + 6]);
             }
           });
+          if (pg.focus) pts.push(...pg.focus());
           if (pg.kiss) { pts.push([pg.mama.x, pg.mama.y - 200]); const [hx, hy] = pg.kiss.target.head(); pts.push([hx, hy]); }
-          return { pts, words };
+          return { pts, words, peak: !!(pg.peak && pg.peak()) };
         });
         require('fs').writeFileSync(`${base}__${f + 1}.json`, JSON.stringify(focus));
+        await p.evaluate(() => { window.__freeze = false; });
       }
       console.log('captured', pages[i], names[j]);
     }

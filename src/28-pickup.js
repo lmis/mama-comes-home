@@ -3,7 +3,7 @@ class PickupPage extends PapaPage {
   constructor() {
     super({ name: 'pickup',
       text: 'When the sun turns orange, Papa zooms back to daycare. “Papa!” shout Léo and Louis, and off they all roll for home.',
-      tricks: [['zoom', 'ramp', 'puddle'], ['papa', 'faster', 'giggle'], ['spin', 'wheelie', 'helmet']],
+      tricks: [['zoom', 'ramp', 'puddle'], ['papa', 'faster', 'giggle'], ['spin', 'wheelie', 'salto', 'helmet']],
       who: ['Sunset street', 'Léo & Louis', 'Papa'] });
     this.acts.durs.papa = 2.4;
     this.sky = ['#f39a6e', '#ffb98a', '#ffe0a8'];

@@ -3,9 +3,9 @@ class PapaPage extends StoryPage {
   constructor(o = {}) {
     super(Object.assign({ name: 'papa', floor: 700,
       text: 'Meanwhile, Papa puts on his helmet and his rollerblades with the glowing red wheels. Into the trolley go Léo and Louis. Wheee!',
-      tricks: [['ramp', 'zoom', 'puddle'], ['faster', 'hello', 'giggle'], ['spin', 'wheelie', 'helmet']],
+      tricks: [['ramp', 'zoom', 'puddle'], ['faster', 'hello', 'giggle'], ['spin', 'wheelie', 'salto', 'helmet']],
       who: ['Street', 'Léo & Louis', 'Papa'],
-      durs: { ramp: 2.6, zoom: 2.6, puddle: 2.4, faster: 2, hello: 2.4, giggle: 1.8, spin: 1.4, wheelie: 2, helmet: 2.2 } }, o));
+      durs: { ramp: 2.6, zoom: 2.6, puddle: 2.4, faster: 2, hello: 2.4, giggle: 1.8, spin: 1.4, wheelie: 2, salto: 2, helmet: 2.2 } }, o));
     this.papa = papa(this.st, { x: 430, y: 650, face: 1, look: { helmet: true, skates: true } });
     this.leo = leo(this.st, { x: 0, y: 0, face: 1, noShadow: true }); this.louis = louis(this.st, { x: 0, y: 0, face: 1, noShadow: true });
     this.cast = [this.papa, this.leo, this.louis];
@@ -21,7 +21,19 @@ class PapaPage extends StoryPage {
     if (a === 'giggle') { this.leo.do('laugh'); this.louis.do('laugh'); sfx('giggle', 1); st.say('HEE HEE HEE!', 640, 360, 54, '#ff8cc8'); }
     if (a === 'spin') { this.papa.do('spin', 1.2); sfx('whee', 0.7, 1.3); st.say('TA-DA!', 430, 380, 54, '#8ce678'); }
     if (a === 'wheelie') { sfx('whee', 0.6, 0.9); st.say('WHEELIE!', 500, 390, 52, '#ffbe5a'); }
+    if (a === 'salto') { sfx('whee', 0.8, 1.4); st.say('SALTO!', 640, 300, 64, '#ffbe5a'); }
     if (a === 'helmet') { this.papa.do('talk', 1.6); sfx('tick', 0.8, 0.8); setTimeout(() => sfx('tick', 0.8, 0.8), 160); st.say('SAFETY FIRST!', 430, 370, 50, '#ff6e6e'); }
+  }
+  // for the button pictures: the showiest moment of a trick, and where to look
+  peak() {
+    const A = this.acts, t = n => A.on(n) ? A.t(n) : -1;
+    return (t('salto') > 0.4 && t('salto') < 1) || (t('ramp') > 1.3 && t('ramp') < 1.9) || (t('spin') > 0.3 && t('spin') < 1) || (t('wheelie') > 0.6 && t('wheelie') < 1.4) || (t('puddle') > 0.9 && t('puddle') < 1.5) || (t('hello') > 0.6 && t('hello') < 1.2) || (t('papa') > 0.3 && t('papa') < 1.4);
+  }
+  focus() {
+    const p = this.papa, jy = this.jumpY(), lift = this.acts.on('salto') ? 240 : 0, k = this.homeward ? -1 : 1, x = k > 0 ? p.x : W - p.x;
+    const pts = [[x - k * 150, p.y - 300 + jy - lift], [x + k * 330, p.y + 10]];
+    if (this.acts.on('hello')) { const d = W + 80 - this.acts.t('hello') * 380; pts.push([k > 0 ? d : W - d, 500], [k > 0 ? d + 100 : W - d - 100, 640]); } // the dog
+    return pts;
   }
   jumpY() {
     const A = this.acts;
@@ -35,12 +47,14 @@ class PapaPage extends StoryPage {
     this.scroll += sp * dt;
     this.papa.x = 430 + Math.sin(t * 0.7) * 50;
     const jy = this.jumpY();
-    if (jy === 0 && this.every('tr', 0.03)) for (const x of [this.papa.x - 26, this.papa.x + 10, this.papa.x + 120, this.papa.x + 230]) {
+    const airborne = jy !== 0 || (A.on('salto') && A.t('salto') < 1.4); // in the air the glow goes up with the skates, no trail on the road
+    if (!airborne && this.every('tr', 0.03)) for (const x of [this.papa.x - 26, this.papa.x + 10]) { // glowing trails from Papa's skates only
       const b = st.add({ kind: 'trail', layer: 0, x, y: 648, vx: -sp, vy: 0, size: rnd(5, 8), col: '#ff4646', life: 0.5 });
     }
     if (this.at('ramp', 1.1)) { st.say('WHEEEE!', 560, 330, 62, '#8cd2ff'); sfx('whee', 1, 1.1); this.leo.do('cheer'); this.louis.do('cheer'); }
     if (this.at('ramp', 2.1)) { st.dust(this.papa.x + 100, 650, 10); sfx('thump', 0.6, 1.3); this.papa.squash = 0.8; }
     if (this.at('puddle', 0.9)) { st.drops(this.papa.x + 120, 640, 30, 420, '#9ad8ff'); sfx('splash', 1); st.say('SPLASH!', this.papa.x + 120, 430, 58, '#8cd2ff'); this.leo.do('laugh'); this.louis.do('laugh'); }
+    if (this.at('salto', 1.4)) { st.dust(this.papa.x, 650, 12); sfx('thump', 0.7, 1.2); this.papa.squash = 0.75; this.leo.do('cheer'); this.louis.do('cheer'); st.say('AGAIN, PAPA!', 640, 380, 50, '#ffd25a'); }
     if (this.at('hello', 0.2)) st.say('HI, DOGGY!', 900, 420, 46, '#ffd25a');
   }
   drawStreet(t) {
@@ -89,7 +103,13 @@ class PapaPage extends StoryPage {
       () => { this.louis.x = tx + 110; this.louis.y = art('prop-trolley') ? 490 : 616; this.louis.draw(); },
     ], this.scroll / 9);
     p.rot = -wheelie * 14;
-    p.draw({ reach: !p.is('spin') && !p.is('talk'), skateSpin: this.scroll / 6 });
+    const sk = A.on('salto') ? A.t('salto') / 1.4 : 1;
+    if (sk < 1) { // a big backflip on rollerblades, turning about his middle
+      const mid = p.y - 120 * p.scale, lift = Math.sin(Math.PI * sk) * 230;
+      push(p.x, mid - lift, -360 * ease(sk)); push(-p.x, -mid);
+      p.draw({ skateSpin: this.scroll / 3 });
+      pop(); pop();
+    } else p.draw({ reach: !p.is('spin') && !p.is('talk'), skateSpin: this.scroll / 6 });
     if (p.is('talk') && !rigReady(PAPA_RIG)) line(p.x + 30, p.y - 160, p.x + 46, p.y - 196, 7, PAPA_COLS.body);
     pop();
   }

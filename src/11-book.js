@@ -9,7 +9,7 @@ const LABEL = {
   zoom: 'Zoom!', lights: 'Light the windows', blimp: 'Blimp', washer: 'Window washer', birds: 'Birds fly by', copter: 'Helicopter', press: 'Press the button', hello: 'Hello!', wow: 'Wow!',
   copier: 'Paper blizzard', planes: 'Paper planes', coffee: 'Coffee fountain', dance: 'Robot disco', heads: 'Boing heads', burp: 'Robot burps',
   boss: 'Back to work!', tidy: 'Tidy up', dancetoo: 'Dance too',
-  ramp: 'Jump the ramp', puddle: 'Splash!', faster: 'Faster, Papa!', spin: 'Spin', wheelie: 'Wheelie', helmet: 'Safety first', papa: '“Papa!”',
+  ramp: 'Big jump', salto: 'Salto!', puddle: 'Splash!', faster: 'Faster, Papa!', spin: 'Spin', wheelie: 'Wheelie', helmet: 'Safety first', papa: '“Papa!”',
   chase: 'Catch me!', ring: 'Ring-a-roses', blocks: 'Block tower', paint: 'Paint splat', music: 'Xylophone', friends: 'Dance, friends', teacher: 'Story time', bubbles: 'Bubbles', jump: 'Jump', nap: 'Nap time',
   slides: 'Next slide', chart: 'Chart goes up', cuckoo: 'Cuckoo clock', snooze: 'Bolt snoozes', clap: 'Hooray!', photo: 'Look at the photo', idea: 'Good idea!', thumbs: 'Great job!',
   noodles: 'Noodles', tomato: 'Tomato squirt', fruit: 'Bouncy fruit', slurp: 'Slurp', moustache: 'Noodle moustache', yum: 'Yum yum', juggle: 'Juggle fruit', airplane: 'Spoon airplane', laugh: 'Laugh',
@@ -27,25 +27,30 @@ const BUTTONS = {
   station: ['leave', 'whistle', 'pigeons', 'wave'],
   tower: ['birds', 'hello', 'wow'],
   office: ['dance', 'heads', 'boss', 'tidy', 'dancetoo'],
-  papa: ['puddle', 'hello', 'faster', 'giggle', 'spin', 'wheelie'],
+  papa: ['puddle', 'hello', 'ramp', 'salto', 'spin', 'wheelie'],
   daycare: ['chase', 'ring', 'bubbles', 'jump', 'giggle', 'nap'],
   meeting: ['idea', 'thumbs', 'clap', 'snooze'],
-  pickup: ['puddle', 'papa', 'faster', 'giggle', 'spin', 'wheelie'],
+  pickup: ['puddle', 'papa', 'ramp', 'salto', 'spin', 'wheelie'],
   dinner: ['noodles', 'tomato', 'fruit', 'airplane', 'moustache', 'juggle'],
   wantmama: ['want', 'phone', 'cuddle'],
   stuck: ['sigh', 'phone', 'umbrella', 'thunder', 'frog', 'cat'],
   ride: ['faster', 'shoot', 'birds', 'think'],
   home: ['hug', 'jump', 'giggle', 'kiss', 'twirl'],
-  tuck: ['yawn', 'sleep', 'sing', 'kissLeo', 'kissLouis', 'lamp'],
+  tuck: ['sleep', 'sing', 'kissLeo', 'kissLouis', 'kissPapa', 'lamp'],
 };
 const Book = {
   pages: [], cur: 0, turn: null, queued: 0, started: false,
   init() {
-    this.pages = [new CoverPage(), new MorningPage(), new StationPage(), new TowerPage(), new OfficePage(), new PapaPage(), new DaycarePage(), new MeetingPage(), new PickupPage(), new DinnerPage(), new WantMamaPage(), new StuckPage(), new RidePage(), new HomeAgainPage(), new TuckPage()];
-    this.pages.forEach(p => { p.shown = 0; });
+    this.pages = [CoverPage, MorningPage, StationPage, TowerPage, OfficePage, PapaPage, DaycarePage, MeetingPage, PickupPage, DinnerPage, WantMamaPage, StuckPage, RidePage, HomeAgainPage, TuckPage].map(P => this.fresh(P));
+  },
+  // a page as it is when you first open it
+  fresh(P) {
+    const p = new P(); p.shown = 0;
     // indoors the rooms are close up, so the family is drawn bigger there
     const INDOOR = { morning: 1.35, office: 1.35, daycare: 1.3, meeting: 1.3, dinner: 1.3, wantmama: 1.35, tuck: 1.3 };
-    this.pages.forEach(p => { const k = INDOOR[p.name]; if (k && p.cast) p.cast.forEach(c => { c.scale *= k; }); });
+    const k = INDOOR[p.name]; if (k && p.cast) p.cast.forEach(c => { c.scale *= k; });
+    if (this.reduce) p.reduce = true;
+    return p;
   },
   page() { return this.pages[this.cur]; },
   // what each of the three buttons does next on this page
@@ -64,8 +69,8 @@ const Book = {
     const dir = Math.sign(to - this.cur); if (!dir) return;
     if (to < 0 || to >= this.pages.length) { sfx('tick', 0.5, 0.6); this.nudge = 0.3 * dir; return; }
     // a forward turn lifts the current page off; a backward turn lays the earlier page back down
+    this.pages[to] = this.fresh(this.pages[to].constructor); // every visit starts the page afresh
     this.turn = { from: this.cur, to, dir, t: 0, dur: 1.15 };
-    this.pages[to].shown = 0;
     sfx('swoosh', 1, dir > 0 ? 1 : 0.85);
     Music.set(this.pages[to].music || this.pages[to].name);
     Amb.set(this.pages[to].name);

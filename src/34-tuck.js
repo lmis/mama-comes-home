@@ -3,9 +3,9 @@ class TuckPage extends StoryPage {
   constructor() {
     super({ name: 'tuck', floor: 720,
       text: 'Mama tucks Léo and Louis in, snug and warm. She sings their song and kisses them goodnight. Goodnight, Léo. Goodnight, Louis.',
-      tricks: [['mobile', 'glowstars', 'lamp'], ['yawn', 'giggle', 'sleep'], ['sing', 'kissLeo', 'kissLouis', 'kiss', 'blanket']],
+      tricks: [['mobile', 'glowstars', 'lamp'], ['yawn', 'giggle', 'sleep'], ['sing', 'kissLeo', 'kissLouis', 'kissPapa', 'kiss', 'blanket']],
       who: ['Bedroom', 'Léo & Louis', 'Mama'],
-      durs: { mobile: 3.5, glowstars: 5, lamp: 6, yawn: 2.4, giggle: 2, sleep: 5, sing: 6, kiss: 2.4, kissLeo: 2.6, kissLouis: 2.6, blanket: 2 } });
+      durs: { mobile: 3.5, glowstars: 5, lamp: 6, yawn: 2.4, giggle: 2, sleep: 5, sing: 6, kiss: 2.4, kissLeo: 2.6, kissLouis: 2.6, kissPapa: 3, blanket: 2 } });
     this.mama = mama(this.st, { x: 640, y: 640, face: 1, look: { bow: true } });
     this.papa = papa(this.st, { x: 1150, y: 640, face: -1 });
     this.cast = [this.mama, this.papa];
@@ -23,6 +23,7 @@ class TuckPage extends StoryPage {
     if (a === 'sleep') sfx('snore', 0.6);
     if (a === 'sing') { this.mama.do('talk', 5.8); sfx('lullaby', 1); }
     if (a === 'kiss') { this.mama.do('kiss', 2); sfx('smooch', 1); setTimeout(() => sfx('smooch', 1, 1.2), 500); st.hearts(...this.pillow(0), 3); setTimeout(() => this.st.hearts(...this.pillow(1), 3), 500); }
+    if (a === 'kissPapa') { this.mama.walkTo(this.papa.x - 150, 260); this.mama.face = 1; }
     if (a === 'kissLeo' || a === 'kissLouis') { const leo = a === 'kissLeo'; this.mama.walkTo(leo ? 575 : 700, 260); this.mama.face = leo ? -1 : 1; }
     if (a === 'blanket') { sfx('swoosh', 0.4, 1.4); st.say('SNUG AS A BUG!', 640, 380, 46, '#ffe9b4'); }
   }
@@ -49,6 +50,11 @@ class TuckPage extends StoryPage {
       if (this.at(n, 0.7)) { this.mama.face = i ? 1 : -1; this.mama.do('kiss', 1.2); sfx('smooch', 1, i ? 1.2 : 1); this.st.hearts(hx, hy - 30, 3); }
       if (this.at(n, 2)) this.mama.walkTo(640, 220);
     }
+    if (this.at('kissPapa', 1.2)) { // Mama and Papa kiss goodnight too
+      this.mama.face = 1; this.mama.do('kiss', 1.4); this.papa.do('kiss', 1.4); sfx('smooch', 1, 0.9);
+      const [hx, hy] = this.papa.head(); this.st.hearts(hx - 70, hy - 20, 5);
+    }
+    if (this.at('kissPapa', 2.4)) this.mama.walkTo(640, 220);
     if (A.on('sing') && this.every('n', 0.5)) this.st.notes(this.mama.x + 40, 430, 1);
     if (A.on('sleep') && this.every('z', 1)) { this.st.zzz(this.pillow(0)[0] + 30, 380); this.st.zzz(this.pillow(1)[0] + 30, 380); }
     if (!A.on('sleep') && this.sleepy() > 0.6 && Math.random() < dt * 0.3) this.st.zzz(this.pillow(irnd(2))[0] + 30, 380);

@@ -25,6 +25,8 @@ for (page, trick), frames in sorted(groups.items()):
         jf = frames[n][:-4] + '.json'
         d = json.load(open(jf)) if os.path.exists(jf) else {}
         pts = d.get('pts', []) if isinstance(d, dict) else d   # words alone don't show the trick
+        peak = isinstance(d, dict) and d.get('peak')          # the page says: this is the moment
+        if peak and pts: best_pts, best_n = pts, n; break
         if len(pts) > len(best_pts): best_pts, best_n = pts, n
     if best_pts:
         im = Image.open(frames[best_n]).convert('RGB'); W, H = im.size; k = W / PAGE_W
