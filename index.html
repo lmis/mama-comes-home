@@ -58,6 +58,16 @@
     width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: pointer;
     background: rgba(42,24,30,0.7); color: var(--paper); border: 2px solid rgba(255,250,240,0.45); }
   #pages svg { width: 22px; height: 22px; }
+  #loupe { position: fixed; z-index: 6; top: max(10px, env(safe-area-inset-top, 0px)); left: max(10px, env(safe-area-inset-left, 0px));
+    width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; padding: 0; cursor: grab; touch-action: none;
+    background: rgba(42,24,30,0.7); color: var(--paper); border: 2px solid rgba(255,250,240,0.45); }
+  #loupe svg { width: 24px; height: 24px; }
+  #loupe:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
+  body.loupe-on #loupe { opacity: 0; }
+  #lens { position: fixed; z-index: 7; display: none; pointer-events: none; width: 180px; height: 180px; border-radius: 50%;
+    border: 6px solid #f6eedd; box-shadow: 0 0 0 3px #46282f, 0 12px 30px rgba(0,0,0,0.5); background: #2a1a22; }
+  body.loupe-on #lens { display: block; }
+  @media (max-height: 500px), (max-width: 520px) { #lens { width: 140px; height: 140px; } }
   #pages:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
   #menu { border: 0; border-radius: 22px; padding: 18px 20px 22px; width: min(1000px, calc(100vw - 32px)); max-height: calc(100vh - 32px); background: #3a2430; color: var(--paper); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
   #menu::backdrop { background: rgba(20,10,16,0.6); }
@@ -92,8 +102,22 @@
     .keys .act { width: 100px; height: 40px; }
     .keys .turn { width: 56px; height: 56px; }
   }
+  @media (orientation: landscape) and (max-height: 500px) {
+    body { flex-direction: row; gap: 14px; padding-block: 8px; }
+    .book { width: min(calc(100vw - 250px), calc((100vh - 20px) * 16 / 9)); }
+    .keys { display: grid; grid-template-columns: repeat(3, auto); gap: 10px 14px; justify-items: center; align-items: center; }
+    .acts { grid-column: 1 / -1; order: -1; grid-template-columns: repeat(2, auto); gap: 8px; }
+    .keys .act.pic { width: 92px; height: 52px; }
+    .keys .act { width: 92px; height: 36px; }
+    .keys .turn { width: 48px; height: 48px; }
+    #mute { margin-left: 0; }
+  }
   @media (prefers-reduced-motion: reduce) { .keys button { transition: none; } }
 </style>
+<button type="button" id="loupe" aria-label="Magnifying glass: drag it over the page" title="Drag me over the page">
+  <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" stroke-width="5"/><path d="M28 28 L40 40" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>
+</button>
+<canvas id="lens" aria-hidden="true"></canvas>
 <button type="button" id="pages" aria-haspopup="dialog" aria-label="Pick a page" title="Pick a page (P)" aria-keyshortcuts="P">
     <svg viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><rect x="8" y="8" width="13" height="13" rx="3"/><rect x="27" y="8" width="13" height="13" rx="3"/><rect x="8" y="27" width="13" height="13" rx="3"/><rect x="27" y="27" width="13" height="13" rx="3"/></svg>
   </button>
@@ -4155,6 +4179,44 @@ class TuckPage extends StoryPage {
   menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
   menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
   window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });
+  // the magnifying glass: drag it from its corner over the page to look closely; let go and it goes home
+  const loupe = document.getElementById('loupe'), lens = document.getElementById('lens'), lg = lens.getContext('2d');
+  const ZOOM = 2.4;
+  let drag = null;
+  function lensAt(x, y) { // x, y: where the lens centre is, in screen pixels
+    const size = lens.offsetWidth, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (lens.width !== size * dpr) lens.width = lens.height = size * dpr;
+    lens.style.left = (x - size / 2) + 'px'; lens.style.top = (y - size / 2) + 'px';
+    const r = canvas.getBoundingClientRect();
+    lg.setTransform(1, 0, 0, 1, 0, 0); lg.fillStyle = '#2a1a22'; lg.fillRect(0, 0, lens.width, lens.height);
+    if (Book.turn) { // mid page-turn: just enlarge what is on screen
+      const k = canvas.width / r.width, sw = size / ZOOM * k;
+      lg.drawImage(canvas, (x - r.left) * k - sw / 2, (y - r.top) * k - sw / 2, sw, sw, 0, 0, lens.width, lens.height);
+      return;
+    }
+    // otherwise paint the page again, enlarged, so the paintings stay sharp
+    const px = (x - r.left) / r.width * W, py = (y - r.top) / r.height * H, s = lens.width / (size / ZOOM / r.width * W);
+    const keep = ctx; ctx = lg;
+    lg.setTransform(s, 0, 0, s, lens.width / 2 - px * s, lens.height / 2 - py * s); lg.lineJoin = lg.lineCap = 'round';
+    try { drawPage(Book.page()); } catch (e) {}
+    ctx = keep;
+  }
+  function lensFrame() {
+    if (!drag) return;
+    lensAt(drag.x, drag.y);
+    requestAnimationFrame(lensFrame);
+  }
+  function lensMove(e) { // on a touch screen the lens floats above the finger, so the finger doesn't hide it
+    drag.x = e.clientX; drag.y = e.clientY - (e.pointerType === 'touch' ? lens.offsetWidth * 0.7 : 0);
+  }
+  loupe.addEventListener('pointerdown', e => {
+    e.preventDefault(); loupe.setPointerCapture(e.pointerId);
+    drag = {}; lensMove(e); document.body.classList.add('loupe-on'); lensFrame();
+  });
+  loupe.addEventListener('pointermove', e => { if (drag) lensMove(e); });
+  const lensOff = () => { drag = null; document.body.classList.remove('loupe-on'); canvas.focus(); };
+  loupe.addEventListener('pointerup', lensOff);
+  loupe.addEventListener('pointercancel', lensOff);
   requestAnimationFrame(frame);
 })();
 </script>

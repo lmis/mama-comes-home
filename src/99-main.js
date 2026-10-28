@@ -161,5 +161,43 @@
   menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
   menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
   window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });
+  // the magnifying glass: drag it from its corner over the page to look closely; let go and it goes home
+  const loupe = document.getElementById('loupe'), lens = document.getElementById('lens'), lg = lens.getContext('2d');
+  const ZOOM = 2.4;
+  let drag = null;
+  function lensAt(x, y) { // x, y: where the lens centre is, in screen pixels
+    const size = lens.offsetWidth, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (lens.width !== size * dpr) lens.width = lens.height = size * dpr;
+    lens.style.left = (x - size / 2) + 'px'; lens.style.top = (y - size / 2) + 'px';
+    const r = canvas.getBoundingClientRect();
+    lg.setTransform(1, 0, 0, 1, 0, 0); lg.fillStyle = '#2a1a22'; lg.fillRect(0, 0, lens.width, lens.height);
+    if (Book.turn) { // mid page-turn: just enlarge what is on screen
+      const k = canvas.width / r.width, sw = size / ZOOM * k;
+      lg.drawImage(canvas, (x - r.left) * k - sw / 2, (y - r.top) * k - sw / 2, sw, sw, 0, 0, lens.width, lens.height);
+      return;
+    }
+    // otherwise paint the page again, enlarged, so the paintings stay sharp
+    const px = (x - r.left) / r.width * W, py = (y - r.top) / r.height * H, s = lens.width / (size / ZOOM / r.width * W);
+    const keep = ctx; ctx = lg;
+    lg.setTransform(s, 0, 0, s, lens.width / 2 - px * s, lens.height / 2 - py * s); lg.lineJoin = lg.lineCap = 'round';
+    try { drawPage(Book.page()); } catch (e) {}
+    ctx = keep;
+  }
+  function lensFrame() {
+    if (!drag) return;
+    lensAt(drag.x, drag.y);
+    requestAnimationFrame(lensFrame);
+  }
+  function lensMove(e) { // on a touch screen the lens floats above the finger, so the finger doesn't hide it
+    drag.x = e.clientX; drag.y = e.clientY - (e.pointerType === 'touch' ? lens.offsetWidth * 0.7 : 0);
+  }
+  loupe.addEventListener('pointerdown', e => {
+    e.preventDefault(); loupe.setPointerCapture(e.pointerId);
+    drag = {}; lensMove(e); document.body.classList.add('loupe-on'); lensFrame();
+  });
+  loupe.addEventListener('pointermove', e => { if (drag) lensMove(e); });
+  const lensOff = () => { drag = null; document.body.classList.remove('loupe-on'); canvas.focus(); };
+  loupe.addEventListener('pointerup', lensOff);
+  loupe.addEventListener('pointercancel', lensOff);
   requestAnimationFrame(frame);
 })();
