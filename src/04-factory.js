@@ -75,6 +75,7 @@ const ROBOT_TINT = ['sepia(0.55) hue-rotate(120deg) saturate(1.7)', 'sepia(0.7) 
 const robotArt = n => art('robot-' + n);
 const robotReady = () => ['body', 'arm', 'spring', 'head-happy', 'head-blink', 'head-talk', 'head-surprised'].every(robotArt);
 class Robot {
+  get base() { return this.baseY ?? ROBOT_BASE; } // where its feet are
   constructor(page, kind, x) {
     Object.assign(this, { page, kind, x, look: LOOKS[kind], blink: 1 + kind * 1.3, cool: 1.5 + kind, phase: 'idle', pt: 0,
       target: null, held: null, side: 1, surprise: 0, ant: 0, antV: 0, grabX: 0 });
@@ -135,7 +136,7 @@ class Robot {
   headPos() {
     const [dy, lean] = this.pose(), l = this.look;
     const h = l.bh + l.neck + l.hh / 2 + this.headLift(), a = lean * Math.PI / 180;
-    return [this.x + Math.sin(a) * h, ROBOT_BASE + dy - Math.cos(a) * h];
+    return [this.x + Math.sin(a) * h, this.base + dy - Math.cos(a) * h];
   }
   mouthPos() { const [hx, hy] = this.headPos(); return [hx, hy + this.look.hh * 0.22]; }
   mouthOpen() {
@@ -155,7 +156,7 @@ class Robot {
   }
   drawBody() {
     const [dy, lean] = this.pose(), l = this.look, lift = this.headLift();
-    push(this.x, ROBOT_BASE + dy, lean);
+    push(this.x, this.base + dy, lean);
     const painted = robotReady();
     if (painted) { // body with legs; the spring neck shows when the head pops up
       const b = robotArt('body'), h = l.bh * 1.45, w = h * b.naturalWidth / b.naturalHeight;
@@ -243,7 +244,7 @@ class Robot {
     }
   }
   drawArms() {
-    const [dy, lean] = this.pose(), l = this.look, t = this.st.t, crew = this.page.crew, base = ROBOT_BASE + dy;
+    const [dy, lean] = this.pose(), l = this.look, t = this.st.t, crew = this.page.crew, base = this.base + dy;
     let shY = base - l.bh + 26;
     for (const s of [-1, 1]) {
       let sx = this.x + s * (l.bw / 2 - 4);

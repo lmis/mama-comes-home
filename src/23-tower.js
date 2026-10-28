@@ -66,8 +66,8 @@ class TowerPage extends StoryPage {
       pop();
       rect(lx + 10, ly + 30, 120, 10, '#4a5a90');
     } else { // Mama, tiny, riding the lift painted on the tower
-      push(1010, 712, 0, -1.25, 1.25); // in front, looking up at her tower
-      drawFigure(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, bag: true, noseUp: -12, open: A.on('hello') || A.on('wow') ? 0.6 : 0, wave: A.on('hello') ? Math.sin(t * 14) : null, cheer: A.on('wow'), blink: st.t % 4 < 0.12, arm: 0 });
+      push(898, 216, 0, -0.24, 0.24); // riding the painted lift
+      drawFigure(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, bag: true, open: A.on('hello') || A.on('wow') ? 0.6 : 0, wave: A.on('hello') ? Math.sin(t * 14) : null, cheer: A.on('wow'), blink: st.t % 4 < 0.12, arm: 0 });
       pop();
     }
     // birds and the little helicopter

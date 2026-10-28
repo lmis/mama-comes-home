@@ -3,7 +3,7 @@ class MeetingPage extends OfficePage {
   constructor() {
     super({ name: 'meeting',
       text: 'All afternoon, Mama helps the robots. Sometimes she looks at the picture of Léo and Louis on her desk, and smiles.',
-      tricks: [['slides', 'chart', 'cuckoo'], ['snooze', 'clap', 'burp'], ['photo', 'idea', 'thumbs']],
+      tricks: [['slides', 'chart', 'cuckoo'], ['snooze', 'clap'], ['photo', 'idea', 'thumbs']],
       who: ['Meeting', 'Robots', 'Mama'],
       durs: { slides: 3, chart: 3, cuckoo: 2, snooze: 4, clap: 2, photo: 3, idea: 2.4, thumbs: 2.2 } });
     this.robots = [new Robot(this, 0, 560), new Robot(this, 1, 820), new Robot(this, 2, 1080)];

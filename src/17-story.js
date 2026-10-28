@@ -38,7 +38,7 @@ function drawTrainArt(x, y, t, o = {}) {
   const bob = Math.sin(t * 9) * (o.moving ? 1.5 : 0.4), ew = 520, eh = ew * eng.naturalHeight / eng.naturalWidth;
   const cw = 540, ch = cw * car.naturalHeight / car.naturalWidth;
   for (let i = (o.cars ?? 2) - 1; i >= 0; i--) {
-    const cx = x - ew - 6 - (i + 1) * (cw + 6);
+    const cx = x - ew + 22 - (i + 1) * (cw - 20); // coupler to coupler
     ctx.drawImage(car, cx, y - ch + bob, cw, ch);
     if (o.window && o.window.car === i) o.window.draw(cx + cw * 0.5, y - ch * 0.42 + bob);
   }

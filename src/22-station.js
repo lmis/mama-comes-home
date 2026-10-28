@@ -75,7 +75,9 @@ class StationPage extends StoryPage {
       }
     } } });
     // the platform pole stands in front of the train
-    const pole = art('bg-02-pole'); if (bg && pole) { const k2 = W / bg.naturalWidth; ctx.drawImage(pole, 1500 * k2, 0, pole.naturalWidth * k2, pole.naturalHeight * k2); }
+    const pole = art('bg-02-pole'), fl = art('bg-02-front-left');
+    if (bg && pole) { const k2 = W / bg.naturalWidth; ctx.drawImage(pole, 1500 * k2, 0, pole.naturalWidth * k2, pole.naturalHeight * k2); }
+    if (bg && fl) { const k2 = W / bg.naturalWidth; ctx.drawImage(fl, 0, 0, fl.naturalWidth * k2, fl.naturalHeight * k2); } // pillar, bush and bench on the left
     // platform in front
     if (!bg) { rect(0, 620, W, H - 620, grad(0, 620, 0, H, ['#d9cfc4', '#c4b8ab'])); rect(0, 616, W, 8, '#ffd25a'); }
     // the conductor robot

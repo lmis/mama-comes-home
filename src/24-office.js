@@ -5,13 +5,14 @@ class OfficePage extends StoryPage {
   constructor(o = {}) {
     super(Object.assign({ name: 'office', floor: 700,
       text: 'Her office is full of robots, and the robots are very, very silly. “Back to work, everyone!” says Mama.',
-      tricks: [['copier', 'planes', 'coffee'], ['dance', 'heads', 'burp'], ['boss', 'tidy', 'dancetoo']],
+      tricks: [['copier', 'planes', 'coffee'], ['dance', 'heads'], ['boss', 'tidy', 'dancetoo']],
       who: ['Office', 'Robots', 'Mama'],
       durs: { copier: 3, planes: 4, coffee: 3.4, boss: 2, tidy: 2.4, dancetoo: 4.4 } }, o));
     this.crew = { gag: null, gt: 0, pending: false, notes: 0 };
     this.machine = { lollipop: () => 0 };
     this.belt = { nearest: () => null };
     this.robots = [new Robot(this, 0, 300), new Robot(this, 1, 640), new Robot(this, 2, 980)];
+    if (this.name === 'office') [[470, 600], [780, 640], [960, 600]].forEach(([x, y], i) => { this.robots[i].x = x; this.robots[i].baseY = y; });
     this.mama = mama(this.st, { x: 640, y: 690, face: 1, look: { bow: true } });
     this.dino = this.mama;
     this.cast = [this.mama];
