@@ -128,15 +128,29 @@ function paintedBird(x, y, s, flap, col, face = 1) {
   const kind = col === '#a0a0c8' ? 'pigeon' : 'bird';
   if (!allArt(`${kind}-body`, `${kind}-head`, `${kind}-wing`, `${kind}-wing-open`)) return false;
   const k = s * (kind === 'pigeon' ? 0.7 : 0.6);
+  const body = art(`${kind}-body`), head = art(`${kind}-head`), bw = body.naturalWidth, bh = body.naturalHeight;
   ctx.save(); ctx.translate(x, y + 8); ctx.scale(face * k, k);
-  const body = art(`${kind}-body`), head = art(`${kind}-head`);
-  ctx.drawImage(body, -body.naturalWidth / 2, -body.naturalHeight, body.naturalWidth, body.naturalHeight);
-  ctx.drawImage(head, body.naturalWidth * 0.08, -body.naturalHeight * 1.32, head.naturalWidth, head.naturalHeight);
-  const w = art(flap === null ? `${kind}-wing` : `${kind}-wing-open`);
-  ctx.save(); ctx.translate(-body.naturalWidth * 0.05, -body.naturalHeight * 0.6);
-  if (flap !== null) ctx.rotate(-0.4 + Math.sin(flap) * 0.6);
-  ctx.drawImage(w, -w.naturalWidth * 0.7, -w.naturalHeight * (flap === null ? 0.4 : 0.9), w.naturalWidth, w.naturalHeight);
-  ctx.restore(); ctx.restore();
+  if (flap === null) { // perched: folded wing
+    ctx.drawImage(body, -bw / 2, -bh, bw, bh);
+    ctx.drawImage(head, bw * 0.08, -bh * 1.32, head.naturalWidth, head.naturalHeight);
+    const w = art(`${kind}-wing`);
+    ctx.drawImage(w, -bw * 0.05 - w.naturalWidth * 0.7, -bh * 0.6 - w.naturalHeight * 0.4, w.naturalWidth, w.naturalHeight);
+    ctx.restore(); return true;
+  }
+  // flying: body leans forward, both wings beat up and down from the shoulder
+  ctx.translate(0, -bh * 0.5); ctx.rotate(0.35); ctx.translate(0, bh * 0.5);
+  const w = art(`${kind}-wing-open`), ww = w.naturalWidth, wh = w.naturalHeight;
+  const beat = Math.sin(flap), sx = -bw * 0.02, sy = -bh * 0.62;
+  const wing = (lift, dark) => {
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(-0.35); ctx.scale(1, lift);
+    if (dark) ctx.filter = 'brightness(0.75)';
+    ctx.drawImage(w, -ww * 0.72, -wh * 0.92, ww, wh); ctx.restore();
+  };
+  wing(0.15 + 0.85 * Math.sin(flap - 0.5), true); // far wing, a touch behind in time
+  ctx.drawImage(body, -bw / 2, -bh, bw, bh);
+  ctx.drawImage(head, bw * 0.08, -bh * 1.32, head.naturalWidth, head.naturalHeight);
+  wing(0.15 + 0.85 * beat, false);
+  ctx.restore();
   return true;
 }
 function paintedCat(x, y, state) { // state: sleepy, awake, meow

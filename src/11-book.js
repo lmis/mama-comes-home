@@ -31,12 +31,12 @@ const BUTTONS = {
   daycare: ['chase', 'ring', 'bubbles', 'jump', 'giggle', 'nap'],
   meeting: ['idea', 'thumbs', 'clap', 'snooze'],
   pickup: ['puddle', 'papa', 'faster', 'giggle', 'spin', 'wheelie'],
-  dinner: ['tomato', 'yum', 'laugh'],
+  dinner: ['noodles', 'tomato', 'fruit', 'airplane', 'moustache', 'juggle'],
   wantmama: ['want', 'phone', 'cuddle'],
-  stuck: ['sigh', 'phone', 'thunder', 'frog', 'cat'],
+  stuck: ['sigh', 'phone', 'umbrella', 'thunder', 'frog', 'cat'],
   ride: ['faster', 'shoot', 'birds', 'think'],
   home: ['hug', 'jump', 'giggle', 'kiss', 'twirl'],
-  tuck: ['yawn', 'giggle', 'sleep', 'sing', 'kiss', 'lamp'],
+  tuck: ['yawn', 'sleep', 'sing', 'kissLeo', 'kissLouis', 'lamp'],
 };
 const Book = {
   pages: [], cur: 0, turn: null, queued: 0, started: false,

@@ -368,7 +368,7 @@ class Puppet {
       case 'yawn': o.open = Math.sin(Math.PI * k) * 1.1; o.blink = k > 0.2 && k < 0.8; break;
       case 'sleep': o.blink = true; break;
       case 'sad': o.sleepy = 0.45; o.sad = true; rot -= 4; break;
-      case 'laugh': o.open = 0.5 + 0.3 * Math.sin(this.at * 25); bob -= Math.abs(Math.sin(this.at * 16)) * 5; break;
+      case 'laugh': o.open = 0.5 + 0.3 * Math.sin(this.at * 25); bob -= Math.abs(Math.sin(this.at * 16)) * 12 * this.scale; break;
       case 'shake': rot += Math.sin(this.at * 22) * 6; break;
       case 'surprise': sy *= 1.1; sx *= 0.94; o.open = 1; break;
       case 'reach': o.reach = true; o.open = 0.3; break;

@@ -18,7 +18,7 @@ class PapaPage extends StoryPage {
     if (a === 'puddle') {}
     if (a === 'faster') { this.leo.do('cheer', 2); this.louis.do('cheer', 2); st.say('FASTER, PAPA!', 640, 380, 52, '#ffd25a'); sfx('giggle', 1, 1.2); }
     if (a === 'hello') { this.leo.do('wave', 2.2); this.louis.do('wave', 2.2); sfx('woof', 0.8, 1.2); }
-    if (a === 'giggle') { this.leo.do('laugh'); this.louis.do('laugh'); sfx('giggle', 1); }
+    if (a === 'giggle') { this.leo.do('laugh'); this.louis.do('laugh'); sfx('giggle', 1); st.say('HEE HEE HEE!', 640, 360, 54, '#ff8cc8'); }
     if (a === 'spin') { this.papa.do('spin', 1.2); sfx('whee', 0.7, 1.3); st.say('TA-DA!', 430, 380, 54, '#8ce678'); }
     if (a === 'wheelie') { sfx('whee', 0.6, 0.9); st.say('WHEELIE!', 500, 390, 52, '#ffbe5a'); }
     if (a === 'helmet') { this.papa.do('talk', 1.6); sfx('tick', 0.8, 0.8); setTimeout(() => sfx('tick', 0.8, 0.8), 160); st.say('SAFETY FIRST!', 430, 370, 50, '#ff6e6e'); }
@@ -85,8 +85,8 @@ class PapaPage extends StoryPage {
     // the ramp, rolling in under them
     const tx = p.x + 60;
     drawTrolley(tx, 650, t, [
-      () => { this.leo.x = tx + 40; this.leo.y = art('prop-trolley') ? 528 : 616; this.leo.draw(); },
-      () => { this.louis.x = tx + 110; this.louis.y = art('prop-trolley') ? 528 : 616; this.louis.draw(); },
+      () => { this.leo.x = tx + 40; this.leo.y = art('prop-trolley') ? 490 : 616; this.leo.draw(); },
+      () => { this.louis.x = tx + 110; this.louis.y = art('prop-trolley') ? 490 : 616; this.louis.draw(); },
     ], this.scroll / 9);
     p.rot = -wheelie * 14;
     p.draw({ reach: !p.is('spin') && !p.is('talk'), skateSpin: this.scroll / 6 });

@@ -66,12 +66,16 @@ class WantMamaPage extends StoryPage {
     // teddies
     const teddy = (x, y) => { circ(x, y - 30, 16, '#c88c5a'); circ(x - 12, y - 44, 6, '#c88c5a'); circ(x + 12, y - 44, 6, '#c88c5a'); ell(x, y, 18, 20, '#c88c5a'); circ(x - 5, y - 32, 2, INK, 0); circ(x + 5, y - 32, 2, INK, 0); };
     if (!bg) teddy(300, 660);
-    this.leo.draw(); this.louis.draw(); this.papa.draw();
-    if (A.on('phone')) { // Papa's phone, with Mama on the screen
-      const [hx, hy] = this.papa.head();
-      if (!bg) rrect(hx - 64, hy + 10, 30, 50, 6, '#3c3c50');
-      const k = clamp((A.t('phone') - 0.8) * 3, 0, 1) * clamp((4 - A.t('phone')) * 3, 0, 1);
-      if (k > 0) { push(hx - 120, hy - 120, 0, k, k); rrect(-70, -60, 140, 110, 20, '#fff6ea'); push(0, 10, 0, 0.7, 0.7); drawFace(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, open: 0.3 + 0.3 * Math.sin(t * 20) }); pop(); poly([30, 50, 60, 50, 60, 80], '#fff6ea', 0); pop(); }
+    this.leo.draw(); this.louis.draw(); this.papa.draw({ reach: A.on('phone') });
+    if (A.on('phone')) { // Papa holds out his phone, and there is Mama on the screen
+      const [hx, hy] = this.papa.hand || this.papa.head(), d = this.papa.face;
+      const k = clamp(A.t('phone') * 4, 0, 1);
+      push(hx + d * 6, hy - 10, d * 8, k, k);
+      rrect(-34, -66, 68, 120, 12, '#2c2c3c', 3); rrect(-28, -58, 56, 100, 7, '#ffe6f0', 0);
+      const on = clamp((A.t('phone') - 0.8) * 3, 0, 1);
+      if (on > 0) { ctx.globalAlpha = on; push(0, 0, 0, -0.5 * d, 0.5); drawFace(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, open: 0.3 + 0.3 * Math.sin(t * 20) }); pop(); ctx.globalAlpha = 1; }
+      else if (Math.sin(t * 30) > 0) circ(0, -8, 10, '#8ce678', 0); // ringing
+      pop();
     }
     if (A.on('story') && !bg) { const [hx, hy] = this.papa.head(); poly([hx - 90, hy + 50, hx - 40, hy + 40, hx - 40, hy + 80, hx - 90, hy + 86], '#fffaf0'); poly([hx - 40, hy + 40, hx + 10, hy + 50, hx + 10, hy + 86, hx - 40, hy + 80], '#fffaf0'); }
     this.finish();

@@ -8,7 +8,7 @@ class MeetingPage extends OfficePage {
       durs: { slides: 3, chart: 3, cuckoo: 2, snooze: 4, clap: 2, photo: 3, idea: 2.4, thumbs: 2.2 } });
     this.robots = [new Robot(this, 0, 560), new Robot(this, 1, 820), new Robot(this, 2, 1080)];
     [[442, 476], [642, 476], [848, 476]].forEach(([x, y], i) => { this.robots[i].x = x; this.robots[i].baseY = y; }); // behind the table
-    this.mama.x = 230; this.mama.y = 680; this.mama.face = 1;
+    this.mama.x = 1130; this.mama.y = 680; this.mama.face = -1; // presenting, by the whiteboard
     this.slide = 0;
   }
   act(a, k) {
@@ -16,18 +16,18 @@ class MeetingPage extends OfficePage {
     if (a === 'slides') { this.slide = (this.slide + 1) % 4; sfx('click', 1, 0.8); sfx('swoosh', 0.3, 1.6); }
     if (a === 'chart') { sfx('chime', 0.6); }
     if (a === 'cuckoo') { sfx('cuckoo', 1); st.say('CUCKOO!', 1170, 210, 46, '#ffe0b4'); }
-    if (a === 'snooze') { sfx('snore', 0.8); st.say('ZZZ...', 560, 300, 46, '#c8e6ff'); }
+    if (a === 'snooze') { sfx('snore', 0.8); st.say('ZZZ...', 442, 215, 46, '#c8e6ff'); }
     if (a === 'clap') { this.robots.forEach(r => { r.surprise = 0.6; r.kick(1); }); st.say('HOORAY!', 820, 280, 54, '#ffd25a'); for (let i = 0; i < 8; i++) setTimeout(() => sfx('tick', 0.5, rnd(0.8, 1.2)), i * 110); }
     if (a === 'burp') { this.crewDo('burp'); }
-    if (a === 'photo') { this.mama.do('reach', 2.6); sfx('hug', 0.6); st.say('MY BOYS!', 300, 380, 50, '#ff8cc8'); st.hearts(300, 480, 4); }
-    if (a === 'idea') { this.mama.do('surprise', 0.6); sfx('ding', 1, 1.5); st.say('AHA!', 230, 330, 56, '#ffd25a'); }
+    if (a === 'photo') { this.mama.do('reach', 2.6); sfx('hug', 0.6); st.say('MY BOYS!', this.mama.x - 40, 280, 50, '#ff8cc8'); st.hearts(this.mama.x, 380, 4); }
+    if (a === 'idea') { this.mama.do('surprise', 0.6); sfx('ding', 1, 1.5); st.say('AHA!', this.mama.x - 30, 230, 56, '#ffd25a'); }
     if (a === 'thumbs') { this.mama.do('cheer', 1.6); st.say('GREAT JOB, ROBOTS!', 640, 300, 46, '#d2b4ff'); sfx('giggle', 0.6); this.robots.forEach(r => r.kick(1)); }
   }
   tick(dt, t, A) {
     FactoryPage.prototype.updateCrew.call(this, dt);
     this.robots.forEach(r => r.update(dt));
-    if (A.on('snooze')) { this.robots[0].blink = -0.05; if (this.every('z', 0.8)) this.st.zzz(580, 330); }
-    if (A.on('photo') && this.every('h', 0.5)) this.st.hearts(300, 470, 1);
+    if (A.on('snooze')) { this.robots[0].blink = -0.05; if (this.every('z', 0.8)) this.st.zzz(480, 255); }
+    if (A.on('photo') && this.every('h', 0.5)) this.st.hearts(this.mama.x, 370, 1);
   }
   draw() {
     const st = this.st, t = st.t, A = this.acts;

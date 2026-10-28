@@ -3,9 +3,9 @@ class TuckPage extends StoryPage {
   constructor() {
     super({ name: 'tuck', floor: 720,
       text: 'Mama tucks Léo and Louis in, snug and warm. She sings their song and kisses them goodnight. Goodnight, Léo. Goodnight, Louis.',
-      tricks: [['mobile', 'glowstars', 'lamp'], ['yawn', 'giggle', 'sleep'], ['sing', 'kiss', 'blanket']],
+      tricks: [['mobile', 'glowstars', 'lamp'], ['yawn', 'giggle', 'sleep'], ['sing', 'kissLeo', 'kissLouis', 'kiss', 'blanket']],
       who: ['Bedroom', 'Léo & Louis', 'Mama'],
-      durs: { mobile: 3.5, glowstars: 5, lamp: 6, yawn: 2.4, giggle: 2, sleep: 5, sing: 6, kiss: 2.4, blanket: 2 } });
+      durs: { mobile: 3.5, glowstars: 5, lamp: 6, yawn: 2.4, giggle: 2, sleep: 5, sing: 6, kiss: 2.4, kissLeo: 2.6, kissLouis: 2.6, blanket: 2 } });
     this.mama = mama(this.st, { x: 640, y: 640, face: 1, look: { bow: true } });
     this.papa = papa(this.st, { x: 1150, y: 640, face: -1 });
     this.cast = [this.mama, this.papa];
@@ -19,19 +19,26 @@ class TuckPage extends StoryPage {
     if (a === 'glowstars') sfx('shimmer', 0.7);
     if (a === 'lamp') { this.lightsOff = !this.lightsOff; sfx('click', 1, this.lightsOff ? 0.6 : 0.8); } // press again to switch them back on
     if (a === 'yawn') { sfx('yawn', 0.8, 1.5); setTimeout(() => sfx('yawn', 0.8, 1.3), 300); st.say('YAWN!', 640, 380, 50, '#cfe0ff'); }
-    if (a === 'giggle') { sfx('giggle', 1, 1.2); st.hearts(470, 470, 2); st.hearts(810, 470, 2); }
+    if (a === 'giggle') { sfx('giggle', 1, 1.2); st.hearts(...this.pillow(0), 2); st.hearts(...this.pillow(1), 2); }
     if (a === 'sleep') sfx('snore', 0.6);
     if (a === 'sing') { this.mama.do('talk', 5.8); sfx('lullaby', 1); }
-    if (a === 'kiss') { this.mama.do('kiss', 2); sfx('smooch', 1); setTimeout(() => sfx('smooch', 1, 1.2), 500); st.hearts(470, 460, 3); setTimeout(() => this.st.hearts(810, 460, 3), 500); }
+    if (a === 'kiss') { this.mama.do('kiss', 2); sfx('smooch', 1); setTimeout(() => sfx('smooch', 1, 1.2), 500); st.hearts(...this.pillow(0), 3); setTimeout(() => this.st.hearts(...this.pillow(1), 3), 500); }
+    if (a === 'kissLeo' || a === 'kissLouis') { const leo = a === 'kissLeo'; this.mama.walkTo(leo ? 575 : 700, 260); this.mama.face = leo ? -1 : 1; }
     if (a === 'blanket') { sfx('swoosh', 0.4, 1.4); st.say('SNUG AS A BUG!', 640, 380, 46, '#ffe9b4'); }
   }
+  pillow(i) { return art('bg-14-tuck-in') ? [[465, 410], [803, 410]][i] : [[404, 446], [744, 446]][i]; } // where each head lies
   sleepy() { return clamp((this.st.t - 6) / 40, 0, 0.8); }
   tick(dt, t, A) {
     this.blinkA -= dt; if (this.blinkA < -0.2) this.blinkA = rnd(2.5, 5);
     this.blinkB -= dt; if (this.blinkB < -0.2) this.blinkB = rnd(2.5, 5);
+    for (const [n, i] of [['kissLeo', 0], ['kissLouis', 1]]) { // walk over, kiss the head on the pillow, walk back
+      const [hx, hy] = this.pillow(i);
+      if (this.at(n, 0.7)) { this.mama.face = i ? 1 : -1; this.mama.do('kiss', 1.2); sfx('smooch', 1, i ? 1.2 : 1); this.st.hearts(hx, hy - 30, 3); }
+      if (this.at(n, 2)) this.mama.walkTo(640, 220);
+    }
     if (A.on('sing') && this.every('n', 0.5)) this.st.notes(this.mama.x + 40, 430, 1);
-    if (A.on('sleep') && this.every('z', 1)) { this.st.zzz(500, 430); this.st.zzz(840, 430); }
-    if (!A.on('sleep') && this.sleepy() > 0.6 && Math.random() < dt * 0.3) this.st.zzz(pick([500, 840]), 430);
+    if (A.on('sleep') && this.every('z', 1)) { this.st.zzz(this.pillow(0)[0] + 30, 380); this.st.zzz(this.pillow(1)[0] + 30, 380); }
+    if (!A.on('sleep') && this.sleepy() > 0.6 && Math.random() < dt * 0.3) this.st.zzz(this.pillow(irnd(2))[0] + 30, 380);
     if (A.on('mobile') && Math.random() < dt * 6) this.st.sparkles(640, 260, 1, 80, '#fff3a0');
   }
   drawBed(x, cols, pj, blink, flip) {
@@ -41,7 +48,8 @@ class TuckPage extends StoryPage {
     const sleepy = A.on('sleep') ? 1 : this.sleepy(), painted = art('bg-14-tuck-in'); // the painting has the beds
     if (!painted) { rrect(x - 130, 420, 26, 200, 12, '#c8965a');
     ell(x - 70, 470, 60, 26, '#fffaf0'); }
-    push(x - 66 + wig * 0.3, 446, -10 + wig, 0.75, 0.75);
+    const [hx, hy] = this.pillow(flip ? 1 : 0);
+    push(hx + wig * 0.3, hy, -10 + wig, 0.75, 0.75);
     drawFace(cols === LEO_COLS ? LEO_RIG : LOUIS_RIG, { t, cols, hair: true, open, blink, sleepy: open > 0.3 ? 0 : sleepy });
     pop();
     if (painted) return;
