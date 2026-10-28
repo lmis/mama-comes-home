@@ -58,9 +58,10 @@ const Book = {
       return { who: p.who[k], what: LABEL[list[i % list.length]] || list[i % list.length] };
     });
   },
-  go(dir) {
-    if (this.turn) { this.queued = dir; return; }
-    const to = this.cur + dir;
+  go(dir) { if (this.turn) { this.queued = dir; return; } this.goTo(this.cur + dir); },
+  goTo(to) { // turn straight to any page (the page menu uses this)
+    if (this.turn) return;
+    const dir = Math.sign(to - this.cur); if (!dir) return;
     if (to < 0 || to >= this.pages.length) { sfx('tick', 0.5, 0.6); this.nudge = 0.3 * dir; return; }
     // a forward turn lifts the current page off; a backward turn lays the earlier page back down
     this.turn = { from: this.cur, to, dir, t: 0, dur: 1.15 };

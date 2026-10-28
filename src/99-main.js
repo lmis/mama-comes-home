@@ -85,6 +85,7 @@
     else Book.pressButton({ space: 0, enter: 1, ctrl: 2 }[k]);
   }
   window.addEventListener('keydown', e => {
+    if (document.getElementById('menu').open) return; // the page menu has the keys
     let k = null;
     if (e.key === 'ArrowRight' || e.key === 'PageDown') k = 'next';
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') k = 'prev';
@@ -129,5 +130,36 @@
     mute.setAttribute('aria-pressed', AU.muted ? 'true' : 'false');
     mute.setAttribute('aria-label', AU.muted ? 'Sound off' : 'Sound on');
   });
+  // the page menu: a little picture of every page; pick one to turn straight to it
+  const TITLES = ['Mama Comes Home', 'Breakfast', 'Bye-bye at the station', 'The tall tower', 'The robot office', 'Papa on rollerblades', 'Daycare', 'The meeting', 'Home with Papa', 'Dinner', 'We want Mama!', 'The rainy station', 'The train home', 'Mama is home', 'Goodnight'];
+  const menu = document.getElementById('menu'), grid = menu.querySelector('.menu-grid'), pagesBtn = document.getElementById('pages');
+  const tiles = Book.pages.map((pg, i) => {
+    const b = document.createElement('button'); b.type = 'button';
+    const c = document.createElement('canvas'); c.width = 320; c.height = 180;
+    const cap = document.createElement('span'); cap.innerHTML = `<b>${i + 1}</b>`; cap.append(TITLES[i] || pg.name);
+    b.append(c, cap); grid.append(b);
+    b.addEventListener('click', () => { menu.close(); audioStart(); Book.goTo(i); canvas.focus(); });
+    return { b, c };
+  });
+  function snapshots() { // a picture of each page as it is right now, without its story text
+    const keep = ctx;
+    tiles.forEach(({ c }, i) => {
+      const g = c.getContext('2d'); ctx = g; g.setTransform(c.width / W, 0, 0, c.width / W, 0, 0); g.lineJoin = g.lineCap = 'round';
+      try { ctx.save(); Book.pages[i].draw(); ctx.restore(); } catch (e) {}
+    });
+    ctx = keep;
+  }
+  function openMenu() {
+    if (menu.open) return;
+    snapshots(); setTimeout(() => menu.open && snapshots(), 500); // again once any pictures have finished loading
+    tiles.forEach(({ b }, i) => { b.removeAttribute('aria-current'); if (i === Book.cur) b.setAttribute('aria-current', 'page'); });
+    menu.showModal(); tiles[Book.cur].b.focus();
+  }
+  // start decoding all the paintings early, so pages (and the menu) never show the stand-in drawings
+  setTimeout(() => { if (typeof ART !== 'undefined') Object.keys(ART).forEach(n => art(n)); }, 1200);
+  pagesBtn.addEventListener('click', openMenu);
+  menu.querySelector('.menu-close').addEventListener('click', () => menu.close());
+  menu.addEventListener('click', e => { if (e.target === menu) menu.close(); }); // click outside the box
+  window.addEventListener('keydown', e => { if ((e.key === 'p' || e.key === 'P') && !menu.open) { e.preventDefault(); openMenu(); } });
   requestAnimationFrame(frame);
 })();
