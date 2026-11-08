@@ -404,7 +404,7 @@ const PAPA_RIG = {
 const MAMA_RIG = {
   prefix: 'mama', k: 0.27,
   at: { body: [-200, -470], tail: [-400, -200], backLeg: [10, -140], frontLeg: [-40, -150],
-    arm: [25, -265, 0.85], farArm: [85, -275, 0.85], head: [-48, -596, 1.25], bag: [40, -300, 0.8] },
+    arm: [25, -265, 0.85], farArm: [85, -275, 0.85], head: [-80, -578, 1.25], bag: [40, -300, 0.8] },
   pivot: PAPA_RIG.pivot,
   heads: ['happy', 'blink', 'talk', 'wide', 'sleepy', 'worried', 'kiss'],
   pieces: ['body', 'tail', 'leg', 'arm', 'bag'],
@@ -413,7 +413,7 @@ const MAMA_RIG = {
 const twinRig = prefix => ({
   prefix, k: 0.42, dark: 0.12,
   at: { body: [-105, -205, 0.56], pjBody: [-112, -214, 0.56], tail: [-225, -112, 0.56], backLeg: [10, -108, 0.74], frontLeg: [-30, -110, 0.74],
-    arm: [18, -150, 0.74], farArm: [50, -158, 0.74], head: [-56, -360, 1.42] },
+    arm: [18, -150, 0.74], farArm: [50, -158, 0.74], head: [-66, -338, 1.42] },
   pivot: PAPA_RIG.pivot,
   heads: ['happy', 'blink', 'talk', 'wide', 'sleepy', 'sad'],
   pieces: ['body', 'tail', 'leg', 'arm', 'pj-body', 'pj-leg', 'pj-arm'],

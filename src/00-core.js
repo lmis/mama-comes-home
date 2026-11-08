@@ -104,8 +104,23 @@ function glow(x, y, r, col, a) {
   ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
 }
 // word: a bouncy onomatopoeia in the display face with a fat ink outline
+// see-through words are drawn whole first and faded as one, so the outline doesn't show through the letters
+const WORD_BUF = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 function word(text, x, y, size, rot, fill) {
   if (size < 2) return;
+  const a = ctx.globalAlpha;
+  if (a < 0.999 && WORD_BUF) {
+    const m = ctx.getTransform(), sc = Math.hypot(m.a, m.b), pad = size * 0.4;
+    const g = WORD_BUF.getContext('2d');
+    g.font = `700 ${size}px Fredoka, "Baloo 2", system-ui, sans-serif`;
+    const w = g.measureText(text).width + pad * 2, h = size * 1.6;
+    WORD_BUF.width = Math.ceil(w * sc); WORD_BUF.height = Math.ceil(h * sc);
+    const keep = ctx; ctx = g; ctx.setTransform(sc, 0, 0, sc, 0, 0); ctx.globalAlpha = 1;
+    word(text, w / 2, h / 2, size, 0, fill);
+    ctx = keep;
+    push(x, y, rot); ctx.scale(1 / sc, 1 / sc); ctx.drawImage(WORD_BUF, -w / 2 * sc, -h / 2 * sc); pop();
+    return;
+  }
   push(x, y, rot);
   ctx.font = `700 ${size}px Fredoka, "Baloo 2", system-ui, sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';

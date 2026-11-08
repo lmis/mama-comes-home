@@ -66,9 +66,14 @@ class TowerPage extends StoryPage {
       pop();
       rect(lx + 10, ly + 30, 120, 10, '#4a5a90');
     } else { // Mama, tiny, riding the lift painted on the tower
-      push(898, 216, 0, -0.24, 0.24); // riding the painted lift
+      // inside the painted lift's glass cabin: clipped to the glass, with the glass and its frame in front of her
+      ctx.save(); ctx.beginPath(); ctx.rect(889, 163, 29, 41); ctx.clip();
+      push(906, 205, 0, -0.18, 0.18);
       drawFigure(MAMA_RIG, { t, cols: MAMA_COLS, bow: true, bag: true, open: A.on('hello') || A.on('wow') ? 0.6 : 0, wave: A.on('hello') ? Math.sin(t * 14) : null, cheer: A.on('wow'), blink: st.t % 4 < 0.12, arm: 0 });
       pop();
+      rect(889, 163, 29, 41, 'rgba(210,235,255,0.22)'); // the glass
+      ctx.restore();
+      line(903, 164, 903, 203, 1.6, 'rgba(235,240,245,0.85)', 0); // the corner post of the cabin
     }
     // birds and the little helicopter
     if (A.on('birds')) { const k = A.t('birds') / 3; for (let i = 0; i < 4; i++) drawBird(W + 40 - k * (W + 200) + i * 50, 200 + i * 20 + Math.sin(t * 4 + i) * 10, 0.8, t * 24 + i, '#6482d2', -1); }
