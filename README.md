@@ -36,11 +36,11 @@ Everything on these pages is supplied art: cut-outs from the bundle in
 rejected is in `art/src/fox/ASSETS.md`), moved, flipped and swapped between the
 bundle's own frames. **Nothing is drawn in code.** Where a page's art hasn't
 arrived yet, the page says "Art needed: …" under the story, and the tricks that
-need that art stay off until it does. Still to come: the city, train, window
-animals and bear (page 4); pan, pancakes and bowl (page 5); night window, moon,
-stars and curtains, the twins in bed, and Mama at her window (page 6); skies and
-road behind the cottage, and the car (pages 3 and 7); the presents and the
-living-room walls (page 8); a pine cone (page 2). `BOOK=fox tools/thumbs.sh`
+need that art stay off until it does. Still to come: the train, window animals
+and bear (page 4); pan, pancakes and bowl (page 5); curtains that open, the twins
+asleep in bed, and Mama at her window (page 6); skies and road behind the cottage,
+and the car (pages 3 and 7); the presents and the living-room walls (page 8);
+a pine cone (page 2). `BOOK=fox tools/thumbs.sh`
 remakes the button pictures.
 
 `index.html` is built from `head.html`, `body.html` and `src/*.js` by

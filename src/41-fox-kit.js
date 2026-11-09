@@ -11,6 +11,15 @@ function prop(n, x, y, w, flip = false, rot = 0) {
   pic(im, x, y, w, flip, rot);
   return [x - w / 2, y - w * im.naturalHeight / im.naturalWidth, x + w / 2, y];
 }
+// an animated painted background: its frames played forward then back (so the loop never jumps), fps frames a second.
+// frame forces one frame (a night's own look). Returns false until the pictures have loaded.
+function drawScene(name, n, t, fps = 6, frame = null) {
+  let i = frame;
+  if (i === null) { const k = Math.floor(t * fps) % (2 * n - 2); i = k < n ? k : 2 * n - 2 - k; }
+  const im = art(`bg-fox-${name}-${i}`) || art(`bg-fox-${name}-0`);
+  if (!im) return false;
+  drawArt(im); return true;
+}
 const inBox = (b, x, y, pad = 0) => b && x >= b[0] - pad && x <= b[2] + pad && y >= b[1] - pad && y <= b[3] + pad;
 const boxMid = b => [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 

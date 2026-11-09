@@ -24,6 +24,11 @@ cuts everything the book uses out of them and checks the result:
 | `kitchen_background.gif` | The kitchen, letterboxed in magenta | **Yes**: pages 1 and 5 |
 | `bedroom_background.gif` | Attic bedroom + packing case stages + travel items + rubber duck | **Yes**: pages 2 and 6, and all the packing |
 | `cottage_exterior.gif` | Cottage (door shut / open), mailbox, robin, hydrangea, butterflies, gate | **Yes**: pages 3 and 7 |
+| `twins_bedroom_night.gif` | The twins' room at night, blue-star and red-star beds; 9 frames of drifting cloud | **Yes**: page 6, one frame per night (clear, cloudy, moon behind cloud) |
+| `station_background.gif` | Station platform and town; a smoke loop | **Yes**: page 4, played as a loop |
+| `bedroom_day_background.gif` | Sunny bedroom; light loop | **Yes**: page 2, played as a loop |
+| `dining_background.gif` | Dining room, a day-to-night time-lapse | **Yes**: page 5, daytime frame |
+| `kitchen_sink_background.gif` | Kitchen with Mama's suitcase by the wall | Spare: the suitcase would be wrong on the Papa-at-home pages |
 | `table_scene_composite.gif`, `ref_*_composite.gif` | Whole scenes, flattened | Reference only, as the bundle says (and Mama has pigtails in one) |
 
 ## The ten checks

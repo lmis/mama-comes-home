@@ -269,6 +269,28 @@ def bedroom(out):
     return p
 
 
+# full paintings with no key: (gif, frames to keep, file name); several frames become an animated background
+SCENES = {
+    'twins-night': ('twins_bedroom_night.gif', range(9)),   # clouds drift, the moon changes: one look per night
+    'station': ('station_background.gif', range(9)),        # chimney smoke drifts
+    'bedroom-day': ('bedroom_day_background.gif', range(9)),  # sunlight shifts on the floor
+    'dining': ('dining_background.gif', [0]),               # a day-to-night time-lapse: daytime only
+}
+
+
+def scene(name):
+    src, idx = SCENES[name]
+    fr = frames(src)
+    out = []
+    for i in idx:
+        a = fr[i][1:-1, 1:-1].astype(np.uint8)  # (the outermost pixel ring is GIF edge noise)
+        img = Image.fromarray(a).resize(((a.shape[1]) * UP, (a.shape[0]) * UP), Image.LANCZOS)
+        p = os.path.join(OUT, f'bg-fox-{name}' + (f'-{i}' if len(idx) > 1 else '') + '.jpg')
+        img.save(p, 'JPEG', quality=86)
+        out.append(p)
+    return out
+
+
 def background(name, src, out):
     """a full painted room, letterboxed on magenta: crop to the picture and save as jpg"""
     a = frames(src)[0]
@@ -342,6 +364,8 @@ def main():
     for name in PROPS:
         written.append(save(prop(name)[0], name))
     bgs = [background('kitchen', 'kitchen_background.gif', 'bg-fox-kitchen.jpg'), bedroom('bg-fox-bedroom.jpg')]
+    for name in SCENES:
+        bgs += scene(name)
     if review:
         os.makedirs(review, exist_ok=True)
         for src in ['family_take_a.gif', 'family_take_b.gif']:

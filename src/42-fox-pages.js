@@ -131,14 +131,14 @@ class FoxPackPage extends FoxPage {
   flying(n) { return this.fly.some(f => f.n === n); }
   draw() {
     const [cx, cy] = this.CASE;
-    const bg = art('bg-fox-bedroom'); if (bg) drawArt(bg); else this.paper();
+    if (!drawScene('bedroom-day', 9, this.st.t, 4)) this.paper();
     // the case on the bed, and the work things beside it
     const caseB = prop(this.packed ? 'case-full' : 'case-open', cx, cy, 330);
     this.caseInBox = [caseB[0] + 30, caseB[1] + 90, caseB[2] - 30, caseB[3] - 60];
     this.pocketBox = [cx - 70, cy - 70, cx + 70, cy - 4];
     prop('pack-notebook', 95, 470, 92, false, -0.1);
-    prop('pack-toothbrush', 905, 632, 74);
-    prop('pack-thermos', 960, 640, 46);
+    prop('pack-toothbrush', 1110, 452, 66);
+    prop('pack-thermos', 1170, 456, 40);
     if (this.duckOut && !this.flying('pack-duck')) prop('pack-duck', 520, 470, 76);
     // the clothes pile on the floor (unless packed or on the way)
     if (!this.packed && !this.flying('pack-sweaters') && !this.flying('pack-shirt')) {
@@ -206,14 +206,14 @@ class FoxCityPage extends FoxPage {
     super({ name: 'fox-city', music: 'office', amb: 'fox-city',
       text: 'Far away, Mama visits a busy city. There are tall buildings, important meetings, and a very serious bear wearing a tiny tie.',
       tricks: [], who: [],
-      missing: ['the city', 'a train on its track', 'animals at the windows', 'the bear and his tiny tie'] });
-    this.mama = new Fox('mama', 250, 714, { face: 1, h: 360 });
+      missing: ['a train on its track', 'animals at the windows', 'the bear and his tiny tie'] });
+    this.mama = new Fox('mama', 420, 712, { face: 1, h: 340 });
     this.cast = [this.mama];
   }
   draw() {
-    this.paper();
+    if (!drawScene('station', 9, this.st.t, 6)) this.paper();
     this.mama.draw();
-    prop('suitcase', 380, 712, 110);
+    prop('suitcase', 540, 712, 104);
     this.finish();
   }
 }
@@ -225,36 +225,40 @@ class FoxPancakePage extends FoxPage {
       text: 'Back home, Papa and the twins make pancakes. One lands on a plate. Another lands somewhere rather surprising!',
       tricks: [], who: [],
       missing: ['frying pan', 'pancakes (flat, flipping, on a plate, on Papa’s head)', 'mixing bowl and spoon'] });
-    this.papa = new Fox('papa', 780, 704, { face: -1, pose: 'happy' });
-    this.blue = new Fox('blue', 250, 646, { face: 1 });
-    this.rust = new Fox('rust', 420, 650, { face: 1 });
+    this.papa = new Fox('papa', 960, 712, { face: -1, pose: 'happy' });
+    this.blue = new Fox('blue', 300, 714, { face: 1 });
+    this.rust = new Fox('rust', 470, 716, { face: 1 });
     this.cast = [this.papa, this.blue, this.rust];
   }
   draw() {
-    const bg = art('bg-fox-kitchen'); if (bg) drawArt(bg); else this.paper();
-    // the twins stand behind the little table, Papa at the stove
+    const bg = art('bg-fox-dining'); if (bg) drawArt(bg); else this.paper();
+    // the twins at the table, Papa by the stove
     this.blue.draw(); this.rust.draw();
-    prop('table', 360, 704, 330);
     this.papa.draw();
     this.finish();
   }
 }
 
-// ---------- 6. three sleeps (the bedroom at night) ----------
+// ---------- 6. three sleeps (the twins' bedroom at night) ----------
+const NIGHT_WIN = [470, 130, 850, 500]; // the window on the night painting (lowered by NIGHT_DROP)
+const NIGHT_DROP = 64; // the painting sits this much lower, so its moon shows below the story words
+const NIGHT_LOOK = [0, 0, 4, 8];       // the painting's frame for each night: clear, cloudy, the moon going behind cloud
 class FoxSleepsPage extends FoxPage {
   constructor() {
     super({ name: 'fox-sleeps', music: 'tuck', amb: 'fox-night',
       text: 'At night, the twins look at the moon. “Mama can see that moon too,” says Papa. One sleep, two sleeps, three sleeps...',
-      tricks: ['sleepNight'], who: ['Calendar'],
-      missing: ['night window with moon and stars', 'curtains', 'twins asleep in bed', 'Mama looking at the moon'],
+      tricks: ['sleepNight'], who: ['The moon'],
+      missing: ['curtains that open', 'twins asleep in bed', 'Mama looking at the moon'],
       durs: { sleepNight: 6.4 } });
-    this.blue = new Fox('blue', 600, 712, { face: 1 });
-    this.rust = new Fox('rust', 740, 714, { face: -1 });
-    this.papa = new Fox('papa', 960, 712, { face: -1 });
+    // each twin by their own bed: blue stars on the left, red on the right
+    this.blue = new Fox('blue', 380, 712, { face: 1 });
+    this.rust = new Fox('rust', 860, 714, { face: -1 });
+    this.papa = new Fox('papa', 1110, 712, { face: -1 });
     this.cast = [this.papa, this.blue, this.rust];
     this.nights = 0;
   }
-  spots() { return [{ name: 'sleepNight', box: this.calBox }]; }
+  // the moon in the window and the calendar both count a night
+  spots() { return [{ name: 'sleepNight', box: NIGHT_WIN }, { name: 'sleepNight', box: this.calBox }]; }
   // a night, once begun, always finishes (a second tap mid-night would otherwise start it over, and
   // little hands tap twice): the countdown only ever moves forward
   press(k) { if (this.tricks[k][0] === 'sleepNight' && this.acts.on('sleepNight')) return; super.press(k); }
@@ -262,7 +266,7 @@ class FoxSleepsPage extends FoxPage {
     if (a === 'sleepNight') {
       if (this.nights >= 3) this.nights = 0; // start the countdown again
       this.night = this.nights + 1;
-      this.papa.say('talk', 1.6); this.say('Mama can see that moon too.', 640, 330, 32, FOX.cream);
+      this.papa.say('talk', 1.6); this.say('Mama can see that moon too.', 640, 470, 32, FOX.cream);
     }
   }
   // one night: Papa says goodnight (0 - 1.8), the twins sleep (1.8 - 4.6),
@@ -271,24 +275,27 @@ class FoxSleepsPage extends FoxPage {
     if (A.on('sleepNight')) {
       const k = A.t('sleepNight'), asleep = k > 1.8 && k < 4.6;
       for (const c of [this.blue, this.rust]) c.base = asleep ? 'joy' : 'idle';
-      if (this.at('sleepNight', 1.9)) { sfx('yawn', 0.5); this.say('Zzz', 670, 420, 40, FOX.cream); }
+      if (this.at('sleepNight', 1.9)) { sfx('yawn', 0.5); this.say('Zzz', 380, 440, 40, FOX.cream); }
       if (this.at('sleepNight', 4.6)) {
         this.nights = this.night; sfx('chime', 0.8, 1 + this.nights * 0.12);
-        this.say(['', 'One sleep!', 'Two sleeps!', 'Three sleeps! Mama comes home today!'][this.nights], 640, 330, this.nights === 3 ? 36 : 44, FOX.ochre);
+        this.say(['', 'One sleep!', 'Two sleeps!', 'Three sleeps! Mama comes home today!'][this.nights], 640, 470, this.nights === 3 ? 36 : 44, FOX.ochre);
         if (this.nights === 3) { this.blue.wave = 2; this.rust.wave = 2; sfx('giggle', 0.8, 1.2); }
       }
     } else this.blue.base = this.rust.base = 'idle';
   }
-  day() { // night (0) to morning (1): the painting is darkened at night, not drawn over
-    const A = this.acts; if (!A.on('sleepNight')) return 0;
-    const k = A.t('sleepNight'); return k < 4.2 ? 0 : k < 4.8 ? (k - 4.2) / 0.6 : k < 5.9 ? 1 : 1 - (k - 5.9) / 0.5;
-  }
   draw() {
-    const day = clamp(this.day(), 0, 1), dark = `brightness(${lerp(0.55, 1, day)}) saturate(${lerp(0.7, 1, day)})`;
-    ctx.save(); ctx.filter = dark;
-    const bg = art('bg-fox-bedroom'); if (bg) drawArt(bg); else this.paper();
-    this.calBox = prop('calendar-' + this.nights, 348, 290, 150);
-    for (const c of [this.blue, this.rust, this.papa]) c.draw();
+    // the sky in the window: the night being slept through, or the last one counted
+    const look = NIGHT_LOOK[this.acts.on('sleepNight') ? this.night : this.nights];
+    const bg = art('bg-fox-twins-night-' + look);
+    if (bg) { // the painting lowered; above it, its own top row of pixels stretched up to the page top
+      const sc = Math.max(W / bg.naturalWidth, H / bg.naturalHeight), w = bg.naturalWidth * sc, x = (W - w) / 2;
+      ctx.drawImage(bg, x, NIGHT_DROP, w, bg.naturalHeight * sc);
+      ctx.drawImage(bg, 0, 0, bg.naturalWidth, 1, x, 0, w, NIGHT_DROP + 1);
+    } else this.paper();
+    this.calBox = prop('calendar-' + this.nights, 300, 400, 110);
+    // the family is lit by the room's lamp, a little dimmer than by day
+    ctx.save(); ctx.filter = 'brightness(0.78) saturate(0.85)';
+    for (const c of [this.papa, this.blue, this.rust]) c.draw();
     ctx.restore();
     this.finish();
   }
