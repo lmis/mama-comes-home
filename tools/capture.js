@@ -3,6 +3,7 @@
 // "before" frame, press the button, take a few frames while the trick plays.
 // Writes PNGs to the output folder; crop.py turns them into button pictures.
 //   node tools/capture.js <out-dir> [page-name ...]
+//   BOOK=fox node tools/capture.js ...   (the Fox Family book)
 const { chromium } = require('playwright');
 const path = require('path');
 const out = process.argv[2] || 'thumbs-raw';
@@ -12,8 +13,9 @@ const FRAMES = [0.35, 0.7, 1.1, 1.6, 2.3]; // seconds after the press
   const b = await chromium.launch();
   const p = await b.newPage({ viewport: { width: 1280, height: 860 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.goto('file://' + path.resolve(__dirname, '../index.html'));
+  await p.goto('file://' + path.resolve(__dirname, '../index.html') + (process.env.BOOK ? '#' + process.env.BOOK : ''));
   await p.waitForTimeout(1500);
+  await p.evaluate(() => { window.__noGlint = true; }); // the Fox book's hint sparkles aren't part of any trick
   await p.keyboard.press('a');
   const pages = await p.evaluate(() => Book.pages.map(pg => pg.name));
   const canvas = p.locator('#page');

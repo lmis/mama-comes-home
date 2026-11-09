@@ -22,6 +22,23 @@ Each press plays the next trick in that key's list, and the colour buttons
 under the book always say which trick comes next. Tapping works too: the
 page edges turn pages, the middle cycles through the three buttons.
 
+## The second book: Three Sleeps (the Fox Family)
+
+Open `index.html#fox`, or pick it from the shelf in the page menu. Mama Fox goes
+away for work for three sleeps, while Papa and the twins (dusty blue and rust
+jumpers) make pancakes and count the nights on the moon calendar; then she comes
+home with two wrapped presents that stay wrapped. There are eight pages, and on
+each, three things to tap in the picture (they glint until found). They are also
+the three colour buttons.
+
+The family and most of the furniture are painted cut-outs from the supplied
+bundle (`art/src/fox/`, cut by `tools/fox_extract.py`; what was checked, used
+and rejected is in `art/src/fox/ASSETS.md`). Drawn in code to match: the
+skies and hills, the whole city with the train, the window animals and the
+bear, the car, the pan, pancakes and bowl, the curtains and night sky, the
+living-room walls, and the presents. `BOOK=fox tools/thumbs.sh` remakes its
+button pictures.
+
 `index.html` is built from `head.html`, `body.html` and `src/*.js` by
 `./build.sh` and is a single self-contained file. `legacy/` holds the pages
 of the earlier "Little Dino Comes Home" version, which are not built.

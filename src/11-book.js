@@ -17,6 +17,15 @@ const LABEL = {
   board: 'Departure board', thunder: 'Thunder', downpour: 'Pouring rain', cat: 'Kitty', announce: 'Announcement', frog: 'Puddle frog', sigh: 'Oh dear', umbrella: 'The train is coming!',
   boost: 'Rocket boost', shoot: 'Shooting star', fireworks: 'Fireworks', loop: 'Loop the loop', song: 'Robot song', wavemoon: 'Wave at the moon', wheee: 'Wheee!', hold: 'Hold on tight', point: 'There’s home!',
   door: 'Open the door', byebots: 'Bye, robots', chimney: 'Heart smoke', hug: 'Big hug', shh: 'Shhh',
+  // the Fox Family book
+  suitcase: 'Wobbly suitcase', twinsPerk: 'Ears up!', calendar: 'Three sleeps',
+  clothes: 'Pack the clothes', socks: 'Boing socks', pocket: 'What’s in the pocket?',
+  hugMama: 'Hug Mama', waveBye: 'Wave goodbye', drive: 'Off goes the car',
+  train: 'The train', windows: 'Who’s at the window?', tie: 'The bear’s tiny tie',
+  flip: 'Flip a pancake', stir: 'Stir the batter', onHead: 'Pancake on Papa',
+  curtains: 'Open the curtains', stars: 'Twinkle stars', sleepNight: 'One more sleep',
+  run: 'Run to Mama', together: 'Big family hug',
+  wiggle: 'Wiggly presents', ribbon: 'Fluttery ribbons', mamaHug: 'Cuddle Mama',
   mobile: 'Spin the mobile', glowstars: 'Starry nightlight', lamp: 'Lights out / on', yawn: 'Big yawn', sleep: 'Fall asleep', sing: 'Sing the song', blanket: 'Tuck in',
 };
 // the buttons under the book, per page: at most six tricks each, the ones
@@ -37,12 +46,34 @@ const BUTTONS = {
   ride: ['faster', 'shoot', 'birds', 'think'],
   home: ['hug', 'jump', 'giggle', 'kiss', 'twirl'],
   tuck: ['sleep', 'sing', 'kissLeo', 'kissLouis', 'kissPapa', 'lamp'],
+  'fox-news': ['suitcase', 'twinsPerk', 'calendar'],
+  'fox-pack': ['clothes', 'socks', 'pocket'],
+  'fox-bye': ['hugMama', 'waveBye', 'drive'],
+  'fox-city': ['train', 'windows', 'tie'],
+  'fox-pancakes': ['flip', 'stir', 'onHead'],
+  'fox-sleeps': ['curtains', 'stars', 'sleepNight'],
+  'fox-home': ['door', 'run', 'together'],
+  'fox-gifts': ['wiggle', 'ribbon', 'mamaHug'],
+};
+// the books on the shelf: their pages and what the page menu calls them
+const BOOKS = {
+  mama: { title: 'Mama Comes Home', label: 'Mama Comes Home, a picture book. Left and right arrows turn the pages; the colour buttons (or keys 1 to 6) make things happen.',
+    pages: () => [CoverPage, MorningPage, StationPage, TowerPage, OfficePage, PapaPage, DaycarePage, MeetingPage, PickupPage, DinnerPage, WantMamaPage, StuckPage, RidePage, HomeAgainPage, TuckPage],
+    titles: ['Mama Comes Home', 'Breakfast', 'Bye-bye at the station', 'The tall tower', 'The robot office', 'Papa on rollerblades', 'Daycare', 'The meeting', 'Home with Papa', 'Dinner', 'We want Mama!', 'The rainy station', 'The train home', 'Mama is home', 'Goodnight'] },
+  fox: { title: 'Three Sleeps', label: 'Three Sleeps, a Fox Family picture book. Left and right arrows turn the pages; tap things in the picture, or use the colour buttons (keys 1 to 3).',
+    pages: () => [FoxNewsPage, FoxPackPage, FoxByePage, FoxCityPage, FoxPancakePage, FoxSleepsPage, FoxHomePage, FoxGiftsPage],
+    titles: ['The big news', 'Packing trouble', 'Goodbye for now', 'Mama’s adventure', 'Adventures with Papa', 'Three sleeps', 'Mama comes home!', 'Two little surprises'] },
 };
 const Book = {
   pages: [], cur: 0, turn: null, queued: 0, started: false,
-  init() {
-    this.pages = [CoverPage, MorningPage, StationPage, TowerPage, OfficePage, PapaPage, DaycarePage, MeetingPage, PickupPage, DinnerPage, WantMamaPage, StuckPage, RidePage, HomeAgainPage, TuckPage].map(P => this.fresh(P));
+  id: 'mama',
+  // open a book at its first page
+  init(id = 'mama') {
+    this.id = BOOKS[id] ? id : 'mama';
+    this.pages = BOOKS[this.id].pages().map(P => this.fresh(P));
+    this.cur = 0; this.turn = null; this.queued = 0;
   },
+  book() { return BOOKS[this.id]; },
   // a page as it is when you first open it
   fresh(P) {
     const p = new P(); p.shown = 0;
@@ -73,13 +104,15 @@ const Book = {
     this.turn = { from: this.cur, to, dir, t: 0, dur: 1.15 };
     sfx('swoosh', 1, dir > 0 ? 1 : 0.85);
     Music.set(this.pages[to].music || this.pages[to].name);
-    Amb.set(this.pages[to].name);
+    Amb.set(this.pages[to].amb || this.pages[to].name);
   },
   press(k) {
     if (this.turn) return;
     this.page().press(k);
   },
   buttons() { return BUTTONS[this.page().name] || []; },
+  // a tap on something in the picture: the same as its button
+  pressName(name) { const i = this.buttons().indexOf(name); if (i >= 0) this.pressButton(i); },
   // button i always does the same trick on a page: find which list holds
   // it and point that list at it before pressing
   pressButton(i) {

@@ -17,8 +17,14 @@
   window.addEventListener('resize', resize);
   resize();
 
-  Book.init();
-  Book.reduce = reduce; for (const p of Book.pages) if (reduce) p.reduce = true;
+  Book.reduce = reduce;
+  Book.init(location.hash === '#fox' ? 'fox' : 'mama');
+  function labelBook() {
+    document.title = Book.book().title;
+    canvas.setAttribute('aria-label', Book.book().label);
+  }
+  labelBook();
+  { const p = Book.page(); Music.set(p.music || p.name); Amb.set(p.amb || p.name); }
 
   function prep(g) {
     ctx = g;
@@ -61,7 +67,7 @@
       if (ready) chevron(W - 26, 360, 1, t);
     }
     if (Book.cur > 0) chevron(26, 360, -1, t);
-    if (Book.cur === 0) {
+    if (Book.cur === 0 && Book.id === 'mama') {
       const a = 0.75 + 0.25 * Math.sin(t * 3);
       ctx.globalAlpha = a;
       word('Press  →  to open the book', 640, 398, 30, 0, '#fff3a0');
@@ -101,7 +107,10 @@
   });
   canvas.addEventListener('pointerdown', e => {
     canvas.focus();
-    const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+    const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    // something in the picture to tap comes first (the Fox Family pages); then the page edges turn pages
+    const pg = Book.page(), name = !Book.turn && pg.hit ? pg.hit(x * W, y * H) : null;
+    if (name) { audioStart(); Book.pressName(name); return; }
     if (x < 0.12) act('prev'); else if (x > 0.88) act('next'); else if (!AU.ctx) audioStart();
   });
   let tapN = 0;
@@ -140,16 +149,31 @@
     mute.setAttribute('aria-label', AU.muted ? 'Sound off' : 'Sound on');
   });
   // the page menu: a little picture of every page; pick one to turn straight to it
-  const TITLES = ['Mama Comes Home', 'Breakfast', 'Bye-bye at the station', 'The tall tower', 'The robot office', 'Papa on rollerblades', 'Daycare', 'The meeting', 'Home with Papa', 'Dinner', 'We want Mama!', 'The rainy station', 'The train home', 'Mama is home', 'Goodnight'];
   const menu = document.getElementById('menu'), grid = menu.querySelector('.menu-grid'), pagesBtn = document.getElementById('pages');
-  const tiles = Book.pages.map((pg, i) => {
-    const b = document.createElement('button'); b.type = 'button';
-    const c = document.createElement('canvas'); c.width = 320; c.height = 180;
-    const cap = document.createElement('span'); cap.innerHTML = `<b>${i + 1}</b>`; cap.append(TITLES[i] || pg.name);
-    b.append(c, cap); grid.append(b);
-    b.addEventListener('click', () => { menu.close(); audioStart(); Book.goTo(i); canvas.focus(); });
-    return { b, c };
-  });
+  let tiles = [];
+  function buildTiles() {
+    grid.textContent = '';
+    const titles = Book.book().titles;
+    tiles = Book.pages.map((pg, i) => {
+      const b = document.createElement('button'); b.type = 'button';
+      const c = document.createElement('canvas'); c.width = 320; c.height = 180;
+      const cap = document.createElement('span'); cap.innerHTML = `<b>${i + 1}</b>`; cap.append(titles[i] || pg.name);
+      b.append(c, cap); grid.append(b);
+      b.addEventListener('click', () => { menu.close(); audioStart(); Book.goTo(i); canvas.focus(); });
+      return { b, c };
+    });
+    menu.querySelectorAll('[data-book]').forEach(b => b.setAttribute('aria-pressed', b.dataset.book === Book.id ? 'true' : 'false'));
+  }
+  buildTiles();
+  // the shelf: switch to the other book, opened at its first page
+  function openBook(id) {
+    if (id === Book.id) return;
+    Book.init(id); labelBook(); buildTiles(); snapshots(); setTimeout(() => menu.open && snapshots(), 500);
+    tiles[0].b.setAttribute('aria-current', 'page');
+    const p = Book.page(); Music.set(p.music || p.name); Amb.set(p.amb || p.name);
+    try { history.replaceState(null, '', id === 'mama' ? location.pathname + location.search : '#fox'); } catch (e) {}
+  }
+  menu.querySelectorAll('[data-book]').forEach(b => b.addEventListener('click', () => { audioStart(); openBook(b.dataset.book); }));
   function snapshots() { // a picture of each page as it is right now, without its story text
     const keep = ctx;
     tiles.forEach(({ c }, i) => {

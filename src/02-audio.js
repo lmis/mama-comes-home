@@ -227,6 +227,11 @@ const Amb = {
     if (name === 'farm') bed(0.04, 'lowpass', 400, 0.8, 0.1);
     if (name === 'woods') { bed(0.06, 'lowpass', 350, 0.8, 0.07); bed(0.008, 'highpass', 5000, 0.7, 0.3); }
     if (name === 'bath') bed(0.02, 'bandpass', 900, 0.8, 0.2);
+    // the Fox Family book
+    if (name === 'fox-in') bed(0.012, 'lowpass', 500, 0.7, 0.05);
+    if (name === 'fox-out') bed(0.04, 'lowpass', 420, 0.8, 0.09);
+    if (name === 'fox-city') { hum(70, 0.02); bed(0.03, 'lowpass', 300, 0.7, 0.1); }
+    if (name === 'fox-night') bed(0.02, 'lowpass', 300, 0.8, 0.06);
   },
   // little sounds now and then, called every frame
   update(dt) {
@@ -252,6 +257,10 @@ const Amb = {
     if (n === 'farm') { every('crk', 0.5, 1.5, cricket); every('moo', 9, 16, () => sfx('moo', 0.15, 0.9, -0.5, out)); every('cluck', 5, 9, () => sfx('bawk', 0.08, 1.2, -0.7, out)); }
     if (n === 'woods') { every('crk', 0.4, 1.2, cricket); every('owl', 8, 14, () => sfx('hoo', 0.14, 0.9, 0.6, out)); every('twig', 4, 9, () => noise(t, 0.04, 0.05, out, { f0: 2500, q: 2, d: 0.01 })); }
     if (n === 'bath') every('drip', 1.2, 2.6, () => osc('sine', rnd(700, 1000), t, 0.08, 0.05, out, { f1: rnd(1400, 1900), sweep: 0.05, d: 0.02 }));
+    if (n === 'fox-in') every('tick', 0.5, 0.5, () => { this.clock ^= 1; osc('sine', this.clock ? 2100 : 1600, t, 0.03, 0.015, out, { d: 0.008 }); });
+    if (n === 'fox-out') every('bird', 1.6, 4.5, () => sfx('tweet', 0.3, rnd(0.85, 1.2), rnd(-0.9, 0.9), out));
+    if (n === 'fox-city') every('honk', 5, 11, () => osc('square', rnd(380, 460), t, 0.18, 0.012, out, { d: 0.05, lp: 1200, pan: rnd(-0.8, 0.8) }));
+    if (n === 'fox-night') { every('crk', 0.4, 1.4, cricket); every('owl', 9, 15, () => sfx('hoo', 0.12, 1, 0.6, out)); }
     if (n === 'bed') every('tick', 0.5, 0.5, () => { this.clock ^= 1; osc('sine', this.clock ? 2100 : 1600, t, 0.03, 0.03, out, { d: 0.008 }); });
   },
 };

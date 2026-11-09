@@ -2,6 +2,7 @@
 # Rebuild the button pictures from the book itself, then rebuild the book.
 #   tools/thumbs.sh            every page
 #   tools/thumbs.sh morning    only some pages
+#   BOOK=fox tools/thumbs.sh   the Fox Family book
 set -euo pipefail
 cd "$(dirname "$0")/.."
 raw=$(mktemp -d)
