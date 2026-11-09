@@ -36,7 +36,7 @@ cuts everything the book uses out of them and checks the result:
 6. **Separate or flattened.** Papa and Mama are joined (her tail crosses his trouser leg), and the twins join hands when they cheer. Both are cut along a fixed column, the shared ink going to both. The table set and the scene composites are flattened, used whole or not at all.
 7. **Layering.** Nothing ships in layers, so pages layer cut-outs themselves (twins behind the pancake table, the family inside the doorway). The bedroom quilt is part of the painting, so the twins sit up behind a drawn sheet fold.
 8. **Idle ↔ action transitions.** Rest → excited → cheer → rest is smooth for the twins. Papa's sheet goes rest → "oh" → arms wide → back. Breathing, sway and blinks are added in code.
-9. **One style.** The bundle's style holds across the sheets used. The drawn parts (skies, the city, the bear, pans, presents) use the same muted palette, a warm ink line and a paper grain laid over every page.
-10. **Missing or defective.** `mug-dots` is clipped by its frame edge (dropped); the calendar never shows three moons lit (rebuilt from the second day's cell); the bedroom's magenta bloom is un-mixed onto paper. See the main README's list for what the book still draws in code.
+9. **One style.** The bundle's style holds across the sheets used, and only bundle art appears in the book (nothing is drawn in code), so the book is one style by construction.
+10. **Missing or defective.** `mug-dots` is clipped by its frame edge (dropped); the calendar never shows three moons lit (rebuilt from the second day's cell by copying pixels, not drawing); the bedroom's magenta bloom is un-mixed onto paper. Art the story needs and the bundle lacks is listed on each page ("Art needed") and in the main README.
 
-The gifts on the last page are drawn in code, and the drawing has no open state.
+The presents are not in the book until their art arrives; whatever comes must be wrapped, and the book will never show them open.

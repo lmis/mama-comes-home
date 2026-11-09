@@ -31,13 +31,17 @@ home with two wrapped presents that stay wrapped. There are eight pages, and on
 each, three things to tap in the picture (they glint until found). They are also
 the three colour buttons.
 
-The family and most of the furniture are painted cut-outs from the supplied
-bundle (`art/src/fox/`, cut by `tools/fox_extract.py`; what was checked, used
-and rejected is in `art/src/fox/ASSETS.md`). Drawn in code to match: the
-skies and hills, the whole city with the train, the window animals and the
-bear, the car, the pan, pancakes and bowl, the curtains and night sky, the
-living-room walls, and the presents. `BOOK=fox tools/thumbs.sh` remakes its
-button pictures.
+Everything on these pages is supplied art: cut-outs from the bundle in
+`art/src/fox/` (cut by `tools/fox_extract.py`; what was checked, used and
+rejected is in `art/src/fox/ASSETS.md`), moved, flipped and swapped between the
+bundle's own frames. **Nothing is drawn in code.** Where a page's art hasn't
+arrived yet, the page says "Art needed: …" under the story, and the tricks that
+need that art stay off until it does. Still to come: the city, train, window
+animals and bear (page 4); pan, pancakes and bowl (page 5); night window, moon,
+stars and curtains, the twins in bed, and Mama at her window (page 6); skies and
+road behind the cottage, and the car (pages 3 and 7); the presents and the
+living-room walls (page 8); a pine cone (page 2). `BOOK=fox tools/thumbs.sh`
+remakes the button pictures.
 
 `index.html` is built from `head.html`, `body.html` and `src/*.js` by
 `./build.sh` and is a single self-contained file. `legacy/` holds the pages
