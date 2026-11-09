@@ -18,7 +18,9 @@
   resize();
 
   Book.reduce = reduce;
-  Book.init(location.hash === '#fox' ? 'fox' : 'mama');
+  const only = window.ONLY_BOOK; // a build holding just one book (the artifact)
+  Book.init(only || (location.hash === '#fox' ? 'fox' : 'mama'));
+  if (only) document.querySelectorAll('.shelf').forEach(el => { el.hidden = true; });
   function labelBook() {
     document.title = Book.book().title;
     canvas.setAttribute('aria-label', Book.book().label);
@@ -171,7 +173,7 @@
     Book.init(id); labelBook(); buildTiles(); snapshots(); setTimeout(() => menu.open && snapshots(), 500);
     tiles[0].b.setAttribute('aria-current', 'page');
     const p = Book.page(); Music.set(p.music || p.name); Amb.set(p.amb || p.name);
-    try { history.replaceState(null, '', id === 'mama' ? location.pathname + location.search : '#fox'); } catch (e) {}
+    if (!only) try { history.replaceState(null, '', id === 'mama' ? location.pathname + location.search : '#fox'); } catch (e) {}
   }
   menu.querySelectorAll('[data-book]').forEach(b => b.addEventListener('click', () => { audioStart(); openBook(b.dataset.book); }));
   function snapshots() { // a picture of each page as it is right now, without its story text
