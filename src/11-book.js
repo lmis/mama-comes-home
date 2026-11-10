@@ -20,7 +20,9 @@ const LABEL = {
   // the Fox Family book
   suitcase: 'Wobbly suitcase', twinsPerk: 'Ears up!', calendar: 'Three sleeps',
   clothes: 'Pack the clothes', socks: 'Boing socks', pocket: 'What’s in the pocket?',
-  hugMama: 'Hug Mama', waveBye: 'Wave goodbye', sleepNight: 'One more sleep',
+  hugMama: 'Hug Mama', waveBye: 'Wave goodbye', drive: 'Off goes the car', train: 'The train', tie: 'The bear’s bow tie',
+  flip: 'Flip a pancake', stir: 'Stir the batter', onHead: 'Pancake on Papa', curtains: 'Open the curtains', nightlight: 'Star nightlight',
+  wiggle: 'Wiggly presents', ribbon: 'Fluttery ribbons', sleepNight: 'One more sleep',
   run: 'Run to Mama', together: 'Big family hug', mamaHug: 'Cuddle Mama',
   mobile: 'Spin the mobile', glowstars: 'Starry nightlight', lamp: 'Lights out / on', yawn: 'Big yawn', sleep: 'Fall asleep', sing: 'Sing the song', blanket: 'Tuck in',
 };
@@ -45,12 +47,12 @@ const BUTTONS = {
   'fox-news': ['suitcase', 'twinsPerk', 'calendar'],
   'fox-pack': ['clothes', 'socks', 'pocket'],
   // (pages wait for art before they get the rest of their tricks)
-  'fox-bye': ['hugMama', 'waveBye'],
-  'fox-city': [],
-  'fox-pancakes': [],
-  'fox-sleeps': ['sleepNight'],
+  'fox-bye': ['hugMama', 'waveBye', 'drive'],
+  'fox-city': ['train', 'tie'],
+  'fox-pancakes': ['flip', 'stir', 'onHead'],
+  'fox-sleeps': ['curtains', 'nightlight', 'sleepNight'],
   'fox-home': ['door', 'run', 'together'],
-  'fox-gifts': ['mamaHug'],
+  'fox-gifts': ['wiggle', 'ribbon', 'mamaHug'],
 };
 // the books on the shelf: their pages and what the page menu calls them
 const BOOKS = {

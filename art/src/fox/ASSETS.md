@@ -29,6 +29,8 @@ cuts everything the book uses out of them and checks the result:
 | `bedroom_day_background.gif` | Sunny bedroom; light loop | **Yes**: page 2, played as a loop |
 | `dining_background.gif` | Dining room, a day-to-night time-lapse | **Yes**: page 5, daytime frame |
 | `kitchen_sink_background.gif` | Kitchen with Mama's suitcase by the wall | Spare: the suitcase would be wrong on the Papa-at-home pages |
+| `living_room_gifts.gif` | Living room with the two wrapped presents; frames 1-2 ribbons flutter, 3-6 a wiggle with sparkles | **Yes**: page 8, frames played by its tricks (wrapped in every frame) |
+| `twins_bedroom_day.gif` | A bundle: 6 backgrounds, a props sheet (frame 6), curtains opening in 9 steps (7), presents opening (8) | Cottage-and-road **yes** (pages 3, 7); props and curtains **yes**; the other backgrounds spare; frame 8 (open presents) **never cut out** |
 | `table_scene_composite.gif`, `ref_*_composite.gif` | Whole scenes, flattened | Reference only, as the bundle says (and Mama has pigtails in one) |
 
 ## The ten checks
@@ -42,6 +44,8 @@ cuts everything the book uses out of them and checks the result:
 7. **Layering.** Nothing ships in layers, so pages layer cut-outs themselves (twins behind the pancake table, the family inside the doorway). The bedroom quilt is part of the painting, so the twins sit up behind a drawn sheet fold.
 8. **Idle ↔ action transitions.** Rest → excited → cheer → rest is smooth for the twins. Papa's sheet goes rest → "oh" → arms wide → back. Breathing, sway and blinks are added in code.
 9. **One style.** The bundle's style holds across the sheets used, and only bundle art appears in the book (nothing is drawn in code), so the book is one style by construction.
+Props are painted with a hatched purple cast shadow; it is stripped from every prop so a prop can stand somewhere other than where it was painted (the case on the bed).
+
 10. **Missing or defective.** `mug-dots` is clipped by its frame edge (dropped); the calendar never shows three moons lit (rebuilt from the second day's cell by copying pixels, not drawing); the bedroom's magenta bloom is un-mixed onto paper. Art the story needs and the bundle lacks is listed on each page ("Art needed") and in the main README.
 
 The presents are not in the book until their art arrives; whatever comes must be wrapped, and the book will never show them open.

@@ -5,11 +5,22 @@
 // what it is waiting for instead.
 const FOX = { ink: '#3b2a24', cream: '#f1e4c8', paper: '#f0e2c4', ochre: '#d3a046' };
 const foxArt = n => art('fox-' + n);
-// draws prop n (bottom centre at x,y, w wide) and returns its box [x0, y0, x1, y1]
-function prop(n, x, y, w, flip = false, rot = 0) {
-  const im = foxArt(n); if (!im) return [x - w / 2, y - w * 0.6, x + w / 2, y];
-  pic(im, x, y, w, flip, rot);
-  return [x - w / 2, y - w * im.naturalHeight / im.naturalWidth, x + w / 2, y];
+// draws prop n (bottom centre at x,y, w wide) and returns its box [x0, y0, x1, y1];
+// sy squashes it (a case lying on a bed is seen a little from above), a = see-through
+function prop(n, x, y, w, flip = false, rot = 0, sy = 1, a = 1) {
+  const im = foxArt(n); if (!im) return [x - w / 2, y - w * 0.6 * sy, x + w / 2, y];
+  const h = w * im.naturalHeight / im.naturalWidth * sy;
+  ctx.save(); if (a < 1) ctx.globalAlpha *= a;
+  ctx.translate(x, y); if (rot) ctx.rotate(rot); if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(im, -w / 2, -h, w, h); ctx.restore();
+  return [x - w / 2, y - h, x + w / 2, y];
+}
+// the page's painting again, but only inside pts (a polygon): puts back the parts of the room that
+// stand in front of someone (a quilt over a cub in bed), using the painting's own pixels
+function repaint(draw, pts) {
+  ctx.save(); ctx.beginPath(); ctx.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
+  ctx.closePath(); ctx.clip(); draw(); ctx.restore();
 }
 // an animated painted background: its frames played forward then back (so the loop never jumps), fps frames a second.
 // frame forces one frame (a night's own look). Returns false until the pictures have loaded.
@@ -117,8 +128,9 @@ class FoxPage extends StoryPage {
   press(k) { const n = this.tricks[k][0]; this.tried.add(n); this.lastTrick = n; super.press(k); this.tap = null; }
   // for the button pictures: each trick's best moment, in seconds after the tap
   peak() {
-    const P = { suitcase: 0.3, twinsPerk: 0.45, calendar: 2.3, clothes: 0.35, socks: 0.75, pocket: 0.55, hugMama: 1.1, waveBye: 0.6,
-      sleepNight: 1.0, door: 0.9, run: 2.1, together: 3, mamaHug: 1.5 };
+    const P = { suitcase: 0.3, twinsPerk: 0.45, calendar: 2.3, clothes: 0.45, socks: 0.75, pocket: 0.55, hugMama: 1.1, waveBye: 0.6, drive: 1.6,
+      train: 1.6, tie: 0.4, flip: 0.5, stir: 0.5, onHead: 2.3, curtains: 1.5, nightlight: 0.2, sleepNight: 1.0, door: 0.9, run: 2.1, together: 3,
+      wiggle: 0.6, ribbon: 0.3, mamaHug: 1.5 };
     const t = this.acts.t(this.lastTrick);
     return t !== undefined && t >= (P[this.lastTrick] ?? 0.5);
   }

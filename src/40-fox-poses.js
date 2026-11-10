@@ -22,3 +22,4 @@ const FOX_POSES = {
   'papa-laugh': [234.0, 818, 808],
   'papa-blink': [206.0, 816, 808],
 };
+const FOX_BOWTIE = [66, 114];  // its top-left on the bear picture

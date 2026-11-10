@@ -215,6 +215,60 @@ def solo(src, fi):
     return cutout(a, np.isin(lab, 1 + np.flatnonzero(sizes >= 300)))
 
 
+# props cut by box rather than by object (things touching their neighbours on the sheet):
+# (gif, frame, x0, y0, x1, y1, keep) where keep optionally narrows the pixels kept
+BUNDLE = 'twins_bedroom_day.gif'  # the big sheet: frame 6 props, frame 7 curtains opening
+BOXED = {
+    'pinecone': (BUNDLE, 6, 9, 12, 70, 83, None),
+    'car': (BUNDLE, 6, 45, 11, 250, 133, 'largest'),
+    'train': (BUNDLE, 6, 255, 30, 497, 124, None),          # without its smoke
+    'train-smoke': (BUNDLE, 6, 290, 0, 400, 40, 'light'),
+    'pan': (BUNDLE, 6, 0, 144, 156, 218, 'largest'),
+    'pan-cake': (BUNDLE, 6, 110, 176, 211, 225, 'largest'),      # a pancake cooking in the pan
+    'pancake': (BUNDLE, 6, 246, 124, 332, 172, 'yellow'),   # the one flying off the third pan
+    'plate-stack': (BUNDLE, 6, 314, 171, 418, 226, None),
+    'bear': (BUNDLE, 6, 415, 128, 506, 228, None),
+    'bear-bowtie': (BUNDLE, 6, 448, 182, 478, 202, 'red'),
+    'bowl': (BUNDLE, 6, 2, 223, 120, 322, 'largest'),
+}
+for _r in range(3):          # the curtains opening, 9 steps, read left to right, top to bottom
+    for _c in range(3):
+        BOXED[f'curtain-{_r * 3 + _c}'] = (BUNDLE, 7, [14, 182, 349][_c], [5, 108, 217][_r], [158, 326, 494][_c], [99, 206, 311][_r], None)  # (sills only: a pink smear lies under each)
+
+
+def boxed(name):
+    src, fi, x0, y0, x1, y1, keep = BOXED[name]
+    a = frames(src)[fi]
+    m = np.zeros(a.shape[:2], bool)
+    m[y0:y1, x0:x1] = True
+    m &= ~key(a)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    if keep == 'yellow':
+        m &= ndimage.binary_dilation((r > 170) & (g > 120) & (b < 140), iterations=2)
+    if keep == 'red':
+        m &= ndimage.binary_dilation((r > 150) & (g < 110) & (b < 110), iterations=1)
+    if keep == 'light':
+        m &= ndimage.binary_dilation((r > 185) & (g > 175) & (b > 165), iterations=1)
+    lab, n = ndimage.label(m)
+    if n:
+        sizes = ndimage.sum(m, lab, range(1, n + 1))
+        m = np.isin(lab, 1 + (np.array([np.argmax(sizes)]) if keep == 'largest' else np.flatnonzero(sizes >= 30)))
+    return cutout(a, m if keep in ('red', 'yellow', 'light') else no_shadow(a, m))
+
+
+def no_shadow(a, m):
+    """props are painted with a hatched purple cast shadow, which looks like a smear once the prop stands
+    somewhere else (a case on a bed): drop those strokes, keep the object"""
+    r, g, b = a[..., 0].astype(int), a[..., 1].astype(int), a[..., 2].astype(int)
+    hatch = (np.minimum(r, b) - g > 22) & (np.abs(r - b) < 70)
+    m = m & ~ndimage.binary_dilation(hatch, iterations=1)
+    lab, n = ndimage.label(m)
+    if n:  # keep the object, not the crumbs the strokes leave behind
+        sizes = ndimage.sum(m, lab, range(1, n + 1))
+        m = np.isin(lab, 1 + np.flatnonzero(sizes >= max(60, sizes.max() * 0.02)))
+    return m
+
+
 def prop(name):
     src, fi, rng = PROPS[name]
     lo, hi = rng[:2]
@@ -232,7 +286,7 @@ def prop(name):
         cx, cy = (sl[1].start + sl[1].stop) / 2, (sl[0].start + sl[0].stop) / 2
         if size >= 300 and lo <= cx < hi and ylo <= cy < yhi:
             keep |= lab == j + 1
-    return cutout(a, keep)
+    return cutout(a, no_shadow(a, keep))
 
 
 PAPER = np.array([240, 226, 196], np.float32)  # the book's paper
@@ -271,6 +325,8 @@ def bedroom(out):
 
 # full paintings with no key: (gif, frames to keep, file name); several frames become an animated background
 SCENES = {
+    'cottage-road': (BUNDLE, [1]),
+    'living-gifts': ('living_room_gifts.gif', range(9)),    # the presents wiggle and sparkle; they never open
     'twins-night': ('twins_bedroom_night.gif', range(9)),   # clouds drift, the moon changes: one look per night
     'station': ('station_background.gif', range(9)),        # chimney smoke drifts
     'bedroom-day': ('bedroom_day_background.gif', range(9)),  # sunlight shifts on the floor
@@ -320,6 +376,8 @@ def check(paths):
         rgb = im[..., :3].astype(int)
         blue = ndimage.binary_dilation(rgb[..., 2] > rgb[..., 0] + 40, iterations=3)  # blue glasses next to orange fur blend to mauve
         mag = is_magenta(im[..., :3]) & vis & ~blue
+        if p.endswith('.jpg'):  # an opaque painting may have mauve skies and pink flowers: only key-strength magenta counts
+            mag = (np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1] > 120) & (rgb[..., 0] > 200)
         if mag.sum():
             bad += 1
             print(f'  MAGENTA LEFT: {os.path.basename(p)}: {int(mag.sum())} px')
@@ -363,6 +421,15 @@ def main():
         f.write('};\n')
     for name in PROPS:
         written.append(save(prop(name)[0], name))
+    boxes = {}
+    for name in BOXED:
+        img, box = boxed(name)
+        boxes[name] = box
+        written.append(save(img, name))
+    # where the bow tie sits on the bear (so it can flutter in place), in bear-picture pixels
+    bb, tb = boxes['bear'], boxes['bear-bowtie']
+    with open(os.path.join(ROOT, 'src', '40-fox-poses.js'), 'a') as f:
+        f.write(f"const FOX_BOWTIE = [{(tb[0] - bb[0]) * UP}, {(tb[1] - bb[1]) * UP}];  // its top-left on the bear picture\n")
     bgs = [background('kitchen', 'kitchen_background.gif', 'bg-fox-kitchen.jpg'), bedroom('bg-fox-bedroom.jpg')]
     for name in SCENES:
         bgs += scene(name)
